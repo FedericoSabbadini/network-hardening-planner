@@ -1,0 +1,140 @@
+{
+    "scenario_name": "01_all_actions_basic",
+    "description": "Scenario base con tutte le azioni",
+    "hosts": [
+        {
+            "id": "web1",
+            "open_ports": [
+                80,
+                443,
+                22
+            ],
+            "services": [
+                "http",
+                "https",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "fileserver",
+            "open_ports": [
+                139,
+                445,
+                22
+            ],
+            "services": [
+                "netbios",
+                "smb",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "legacy",
+            "open_ports": [
+                23,
+                22
+            ],
+            "services": [
+                "ssh"
+            ],
+            "critical": false
+        }
+    ],
+    "policy": {
+        "forbidden_ports": [
+            80,
+            139,
+            23
+        ],
+        "critical_services": {}
+    },
+    "service_port_mapping": {
+        "http": [
+            80
+        ],
+        "https": [
+            443
+        ],
+        "ssh": [
+            22
+        ],
+        "mysql": [
+            3306
+        ],
+        "postgresql": [
+            5432
+        ],
+        "redis": [
+            6379
+        ],
+        "mongodb": [
+            27017
+        ],
+        "ftp": [
+            21
+        ],
+        "telnet": [
+            23
+        ],
+        "smtp": [
+            25
+        ],
+        "pop3": [
+            110
+        ],
+        "imap": [
+            143
+        ],
+        "tomcat": [
+            8080
+        ],
+        "nodejs": [
+            3000
+        ],
+        "rabbitmq": [
+            5672
+        ],
+        "prometheus": [
+            9090
+        ],
+        "grafana": [
+            3000
+        ],
+        "elasticsearch": [
+            9200
+        ],
+        "kibana": [
+            5601
+        ],
+        "smb": [
+            445
+        ],
+        "netbios": [
+            139
+        ],
+        "rdp": [
+            3389
+        ],
+        "vnc": [
+            5900
+        ],
+        "nfs": [
+            2049
+        ],
+        "ldap": [
+            389
+        ],
+        "rsync": [
+            873
+        ],
+        "snmp": [
+            161
+        ],
+        "tftp": [
+            69
+        ]
+    },
+    "service_dependencies": {}
+}

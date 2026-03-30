@@ -1,0 +1,262 @@
+{
+    "scenario_name": "06_financial_pci",
+    "description": "Compliance PCI-DSS",
+    "hosts": [
+        {
+            "id": "web_banking",
+            "open_ports": [
+                80,
+                443,
+                22
+            ],
+            "services": [
+                "http",
+                "https",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "api_gateway",
+            "open_ports": [
+                443,
+                3000,
+                22
+            ],
+            "services": [
+                "https",
+                "nodejs",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "core_banking",
+            "open_ports": [
+                8080,
+                69,
+                22
+            ],
+            "services": [
+                "tomcat",
+                "tftp",
+                "ssh"
+            ],
+            "critical": true
+        },
+        {
+            "id": "tx_processor",
+            "open_ports": [
+                8080,
+                443,
+                22
+            ],
+            "services": [
+                "tomcat",
+                "https",
+                "ssh"
+            ],
+            "critical": true
+        },
+        {
+            "id": "mq_cluster",
+            "open_ports": [
+                5672,
+                161,
+                22
+            ],
+            "services": [
+                "rabbitmq",
+                "snmp",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "accounts_db",
+            "open_ports": [
+                5432,
+                22,
+                23
+            ],
+            "services": [
+                "postgresql",
+                "ssh"
+            ],
+            "critical": true
+        },
+        {
+            "id": "tx_db",
+            "open_ports": [
+                5432,
+                22,
+                139
+            ],
+            "services": [
+                "postgresql",
+                "ssh"
+            ],
+            "critical": true
+        },
+        {
+            "id": "admin_console",
+            "open_ports": [
+                3389,
+                5900,
+                22
+            ],
+            "services": [
+                "rdp",
+                "vnc",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "security_siem",
+            "open_ports": [
+                9200,
+                5601,
+                22,
+                23
+            ],
+            "services": [
+                "elasticsearch",
+                "kibana",
+                "ssh"
+            ],
+            "critical": false
+        }
+    ],
+    "policy": {
+        "forbidden_ports": [
+            80,
+            23,
+            139,
+            161,
+            69,
+            3389,
+            5900
+        ],
+        "critical_services": {
+            "core_banking": [
+                "tomcat"
+            ],
+            "tx_processor": [
+                "tomcat",
+                "https"
+            ],
+            "accounts_db": [
+                "postgresql"
+            ],
+            "tx_db": [
+                "postgresql"
+            ]
+        }
+    },
+    "service_port_mapping": {
+        "http": [
+            80
+        ],
+        "https": [
+            443
+        ],
+        "ssh": [
+            22
+        ],
+        "mysql": [
+            3306
+        ],
+        "postgresql": [
+            5432
+        ],
+        "redis": [
+            6379
+        ],
+        "mongodb": [
+            27017
+        ],
+        "ftp": [
+            21
+        ],
+        "telnet": [
+            23
+        ],
+        "smtp": [
+            25
+        ],
+        "pop3": [
+            110
+        ],
+        "imap": [
+            143
+        ],
+        "tomcat": [
+            8080
+        ],
+        "nodejs": [
+            3000
+        ],
+        "rabbitmq": [
+            5672
+        ],
+        "prometheus": [
+            9090
+        ],
+        "grafana": [
+            3000
+        ],
+        "elasticsearch": [
+            9200
+        ],
+        "kibana": [
+            5601
+        ],
+        "smb": [
+            445
+        ],
+        "netbios": [
+            139
+        ],
+        "rdp": [
+            3389
+        ],
+        "vnc": [
+            5900
+        ],
+        "nfs": [
+            2049
+        ],
+        "ldap": [
+            389
+        ],
+        "rsync": [
+            873
+        ],
+        "snmp": [
+            161
+        ],
+        "tftp": [
+            69
+        ]
+    },
+    "service_dependencies": {
+        "web_banking": {
+            "http": [
+                "nodejs"
+            ]
+        },
+        "api_gateway": {
+            "nodejs": [
+                "tomcat",
+                "rabbitmq"
+            ]
+        },
+        "tx_processor": {
+            "tomcat": [
+                "postgresql",
+                "rabbitmq"
+            ]
+        }
+    }
+}

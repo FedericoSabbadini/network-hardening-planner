@@ -1,0 +1,220 @@
+{
+    "scenario_name": "05_healthcare_gdpr",
+    "description": "Compliance GDPR/HIPAA",
+    "hosts": [
+        {
+            "id": "patient_portal",
+            "open_ports": [
+                80,
+                443,
+                22
+            ],
+            "services": [
+                "http",
+                "https",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "ehr_app",
+            "open_ports": [
+                8080,
+                443,
+                22
+            ],
+            "services": [
+                "tomcat",
+                "https",
+                "ssh"
+            ],
+            "critical": true
+        },
+        {
+            "id": "legacy_gateway",
+            "open_ports": [
+                25,
+                23,
+                22
+            ],
+            "services": [
+                "smtp",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "patient_db",
+            "open_ports": [
+                5432,
+                22
+            ],
+            "services": [
+                "postgresql",
+                "ssh"
+            ],
+            "critical": true
+        },
+        {
+            "id": "medical_files",
+            "open_ports": [
+                445,
+                139,
+                22
+            ],
+            "services": [
+                "smb",
+                "netbios",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "admin_ws",
+            "open_ports": [
+                3389,
+                161,
+                22
+            ],
+            "services": [
+                "rdp",
+                "snmp",
+                "ssh"
+            ],
+            "critical": false
+        },
+        {
+            "id": "audit_db",
+            "open_ports": [
+                3306,
+                22,
+                139
+            ],
+            "services": [
+                "mysql",
+                "ssh"
+            ],
+            "critical": true
+        }
+    ],
+    "policy": {
+        "forbidden_ports": [
+            80,
+            25,
+            23,
+            139,
+            161,
+            3389
+        ],
+        "critical_services": {
+            "ehr_app": [
+                "tomcat",
+                "https"
+            ],
+            "patient_db": [
+                "postgresql"
+            ],
+            "audit_db": [
+                "mysql"
+            ]
+        }
+    },
+    "service_port_mapping": {
+        "http": [
+            80
+        ],
+        "https": [
+            443
+        ],
+        "ssh": [
+            22
+        ],
+        "mysql": [
+            3306
+        ],
+        "postgresql": [
+            5432
+        ],
+        "redis": [
+            6379
+        ],
+        "mongodb": [
+            27017
+        ],
+        "ftp": [
+            21
+        ],
+        "telnet": [
+            23
+        ],
+        "smtp": [
+            25
+        ],
+        "pop3": [
+            110
+        ],
+        "imap": [
+            143
+        ],
+        "tomcat": [
+            8080
+        ],
+        "nodejs": [
+            3000
+        ],
+        "rabbitmq": [
+            5672
+        ],
+        "prometheus": [
+            9090
+        ],
+        "grafana": [
+            3000
+        ],
+        "elasticsearch": [
+            9200
+        ],
+        "kibana": [
+            5601
+        ],
+        "smb": [
+            445
+        ],
+        "netbios": [
+            139
+        ],
+        "rdp": [
+            3389
+        ],
+        "vnc": [
+            5900
+        ],
+        "nfs": [
+            2049
+        ],
+        "ldap": [
+            389
+        ],
+        "rsync": [
+            873
+        ],
+        "snmp": [
+            161
+        ],
+        "tftp": [
+            69
+        ]
+    },
+    "service_dependencies": {
+        "patient_portal": {
+            "http": [
+                "tomcat"
+            ]
+        },
+        "ehr_app": {
+            "tomcat": [
+                "postgresql"
+            ]
+        }
+    }
+}
