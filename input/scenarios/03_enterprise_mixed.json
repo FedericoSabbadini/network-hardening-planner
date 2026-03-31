@@ -1,6 +1,6 @@
 {
     "scenario_name": "03_enterprise_mixed",
-    "description": "Infrastruttura enterprise",
+    "description": "An enterprise network with a mix of web, application, database, storage, and monitoring servers. The web servers (web1 and web2) run HTTP and HTTPS services, the application servers (app1 and app2) run Tomcat and FTP services, the database servers (db_master and db_slave) run MySQL, the storage server runs SMB and NetBIOS, and the monitoring server runs Prometheus. The policy forbids certain ports to be exposed to the internet.",
     "hosts": [
         {
             "id": "web1",

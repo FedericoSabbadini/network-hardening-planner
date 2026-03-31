@@ -1,6 +1,6 @@
 {
     "scenario_name": "08_impossible",
-    "description": "Scenario impossibile da risolvere: c'è un host con un servizio critico che utilizza una porta proibita, e non ci sono altre azioni possibili per mitigare il rischio.",
+    "description": "An impossible scenario where a critical service is running on a forbidden port, making it impossible to harden the network without violating the policy. The network consists of a single host running a critical MySQL service on port 3306, which is forbidden by the policy. The only way to harden the network would be to migrate the MySQL service to a different port, but this is not possible due to the critical nature of the service and the lack of alternative ports.",
     "hosts": [
         {
             "id": "critical_legacy",

@@ -1,6 +1,6 @@
 {
     "scenario_name": "07_stress_test",
-    "description": "Test di scalabilità. Scenario con 15 host, ognuno con una combinazione di porte aperte e servizi. La policy vieta un certo numero di porte e definisce servizi critici su più host.",
+    "description": "Stress test scenario. An enterprise network with a large number of hosts and services, designed to test the scalability and performance of the planner. The network includes multiple web servers, application servers, database servers, storage servers, mail servers, and administrative servers, each running a variety of services. The policy forbids certain ports to be exposed to the internet.",
     "hosts": [
         {
             "id": "web1",

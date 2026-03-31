@@ -1,10 +1,10 @@
-# === CONFIGURAZIONE DEI SERVIZI E PORTE ===
-# Mappa dei servizi ai loro numeri di porta standard
+# === SERVICE AND PORT CONFIGURATION ===
+# Mapping of services to their standard port numbers
 SERVICE_PORT_MAPPING = {
-    # Servizi web
-    'http': [80],           # HTTP non cifrato (insicuro)
-    'https': [443],         # HTTP cifrato (sicuro)
-    'ssh': [22],            # Secure Shell (sicuro)
+    # Web services
+    'http': [80],           # Unencrypted HTTP (insecure)
+    'https': [443],         # Encrypted HTTP (secure)
+    'ssh': [22],            # Secure Shell (secure)
 
     # Database
     'mysql': [3306],        # MySQL
@@ -12,10 +12,10 @@ SERVICE_PORT_MAPPING = {
     'redis': [6379],        # Redis (cache)
     'mongodb': [27017],     # MongoDB
 
-    # Protocolli legacy (generalmente insicuri)
+    # Legacy protocols (generally insecure)
     'ftp': [21],            # File Transfer Protocol
-    'telnet': [23],         # Terminale remoto non cifrato
-    'smtp': [25],           # Email (versione base)
+    'telnet': [23],         # Unencrypted remote terminal
+    'smtp': [25],           # Email (basic version)
     'pop3': [110],          # Email retrieval
     'imap': [143],          # Email retrieval
 
@@ -30,7 +30,7 @@ SERVICE_PORT_MAPPING = {
     'elasticsearch': [9200], # Search engine
     'kibana': [5601],       # Log visualization
 
-    # File sharing e accesso remoto
+    # File sharing and remote access
     'smb': [445],           # Windows file sharing
     'netbios': [139],       # Legacy Windows networking
     'rdp': [3389],          # Remote Desktop
@@ -40,12 +40,12 @@ SERVICE_PORT_MAPPING = {
 
     # Utility
     'rsync': [873],         # File synchronization
-    'snmp': [161],          # Network management (insicuro)
-    'tftp': [69],           # Trivial FTP (molto insicuro)
+    'snmp': [161],          # Network management (insecure)
+    'tftp': [69],           # Trivial FTP (very insecure)
     'dns': [53],            # Domain Name System
     
     
-    # Altri servizi comuni
+    # Other common services
     'dhcp': [67],           # Dynamic Host Configuration Protocol
     'ntp': [123],           # Network Time Protocol
     'sip': [5060],          # Session Initiation Protocol (VoIP)
@@ -61,26 +61,29 @@ SERVICE_PORT_MAPPING = {
 }
 
 
-# === PORTE ALTERNATIVE CONSIGLIATE ===
-# Per ogni porta standard, viene suggerita una porta alternativa più alta
+# === RECOMMENDED ALTERNATIVE PORTS ===
+# For each standard port, an alternative higher port is suggested
 ALTERNATIVE_PORTS = {
-    80: 8080,      # HTTP: da 80 a 8080
-    21: 2121,      # FTP: da 21 a 2121
-    23: 2323,      # Telnet: da 23 a 2323
-    110: 1110,     # POP3: da 110 a 1110
-    143: 1143,     # IMAP: da 143 a 1143
-    3389: 33389,   # RDP: da 3389 a 33389
-    5900: 59000,   # VNC: da 5900 a 59000
-    445: 4455,     # SMB: da 445 a 4455
-    389: 3890,     # LDAP: da 389 a 3890
-    2049: 20490,   # NFS: da 2049 a 20490
+    80: 8080,      # HTTP: from 80 to 8080
+    21: 2121,      # FTP: from 21 to 2121
+    23: 2323,      # Telnet: from 23 to 2323
+    110: 1110,     # POP3: from 110 to 1110
+    143: 1143,     # IMAP: from 143 to 1143
+    3389: 33389,   # RDP: from 3389 to 33389
+    5900: 59000,   # VNC: from 5900 to 59000
+    445: 4455,     # SMB: from 445 to 4455
+    389: 3890,     # LDAP: from 389 to 3890
+    2049: 20490,   # NFS: from 2049 to 20490
+    3306: 33060,   # MySQL: from 3306 to 33060
+    5432: 54320,   # PostgreSQL: from 5432 to 54320
+    8080: 80800,   # Tomcat: from 8080 to 80800
 }
 
 
-# === COSTI DELLE AZIONI DI MITIGAZIONE ===
-# Assegna un costo a ciascuna azione di mitigazione per aiutare nella valutazione delle strategie
+# === MITIGATION ACTION COSTS ===
+# Assigns a cost to each mitigation action to aid in strategy evaluation
 ACTION_COSTS = {
-    'chiudi_porta': 1,       # Costo basso: operazione semplice, nessun impatto
-    'disattiva_servizio': 5, # Costo alto: causa downtime del servizio!
-    'migra_servizio': 3      # Costo medio: richiede riconfigurazione ma no downtime
+    'close_port': 1,       # Low cost: simple operation, no impact
+    'deactivate_service': 5, # High cost: causes service downtime!
+    'migrate_service': 3      # Medium cost: requires reconfiguration but no downtime
 }
