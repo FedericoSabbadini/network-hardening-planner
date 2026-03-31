@@ -1,9 +1,0 @@
-scenario,status,time,actions,cost,chiudi,stop,migra
-01_all_actions_basic,SUCCESS,0.761,4,10,2,1,1
-02_deps_all_actions,SUCCESS,0.895,4,10,2,1,1
-03_enterprise_mixed,SUCCESS,1.127,11,27,5,2,4
-04_security_incident,SUCCESS,1.827,9,23,4,2,3
-05_healthcare_gdpr,SUCCESS,2.294,10,26,5,3,2
-06_financial_pci,SUCCESS,1.386,10,24,5,2,3
-07_stress_test,SUCCESS,3.14,26,72,10,7,9
-08_impossible,UNSOLVABLE,0.285,0,0,0,0,0

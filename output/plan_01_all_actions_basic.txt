@@ -1,7 +1,0 @@
-Piano: 01_all_actions_basic
-==================================================
-
-  1. migra_servizio_web1_http_p80to8080
-  2. disattiva_servizio_fileserver_netbios
-  3. chiudi_porta_fileserver_p139
-  4. chiudi_porta_legacy_p23

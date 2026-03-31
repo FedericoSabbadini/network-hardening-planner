@@ -1,6 +1,6 @@
 {
     "scenario_name": "01_all_actions_basic",
-    "description": "Scenario base con tutte le azioni",
+    "description": "A basic scenario with three hosts, each with a mix of open ports and services. The policy forbids certain ports, and there are no critical services defined.",
     "hosts": [
         {
             "id": "web1",

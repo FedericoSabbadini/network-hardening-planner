@@ -1,7 +1,0 @@
-Piano: 02_deps_all_actions
-==================================================
-
-  1. disattiva_servizio_mailserver_smtp
-  2. chiudi_porta_mailserver_p25
-  3. migra_servizio_frontend_http_p80to8080
-  4. chiudi_porta_database_p23
