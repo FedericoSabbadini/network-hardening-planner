@@ -42,6 +42,22 @@ SERVICE_PORT_MAPPING = {
     'rsync': [873],         # File synchronization
     'snmp': [161],          # Network management (insicuro)
     'tftp': [69],           # Trivial FTP (molto insicuro)
+    'dns': [53],            # Domain Name System
+    
+    
+    # Altri servizi comuni
+    'dhcp': [67],           # Dynamic Host Configuration Protocol
+    'ntp': [123],           # Network Time Protocol
+    'sip': [5060],          # Session Initiation Protocol (VoIP)
+    'rtsp': [554],          # Real Time Streaming Protocol
+    'ldap': [389],          # Lightweight Directory Access Protocol
+    'kerberos': [88],       # Kerberos authentication
+    'syslog': [514],        # System logging
+    'snmp': [161],          # Simple Network Management Protocol
+    'sftp': [22],           # Secure File Transfer Protocol (over SSH)
+    'pop3': [110],          # Post Office Protocol 3
+    'ntp': [123],           # Network Time Protocol
+
 }
 
 
@@ -58,13 +74,6 @@ ALTERNATIVE_PORTS = {
     445: 4455,     # SMB: da 445 a 4455
     389: 3890,     # LDAP: da 389 a 3890
     2049: 20490,   # NFS: da 2049 a 20490
-
-    # NOTA: Le seguenti porte NON hanno alternativa!
-    # Questo significa che i servizi su queste porte devono essere DISATTIVATI
-    # - 25 (SMTP): protocollo email legacy
-    # - 139 (NetBIOS): protocollo Windows obsoleto
-    # - 161 (SNMP): management non sicuro
-    # - 69 (TFTP): trasferimento file senza autenticazione
 }
 
 

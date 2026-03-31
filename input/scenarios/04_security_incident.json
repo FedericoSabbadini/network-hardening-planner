@@ -4,85 +4,105 @@
     "hosts": [
         {
             "id": "dmz_web",
-            "open_ports": [
-                80,
-                443,
-                22
-            ],
             "services": [
-                "http",
-                "https",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "http",
+                    "port": 80,
+                    "depends_on": [
+                        "tomcat"
+                    ]
+                },
+                {
+                    "name": "https",
+                    "port": 443
+                },
+                {
+                    "name": "ssh"
+                }
+            ]
         },
         {
             "id": "dmz_mail",
-            "open_ports": [
-                25,
-                110,
-                143,
-                22
-            ],
             "services": [
-                "smtp",
-                "pop3",
-                "imap",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "smtp",
+                    "port": 25
+                },
+                {
+                    "name": "pop3",
+                    "port": 110
+                },
+                {
+                    "name": "imap",
+                    "port": 143
+                },
+                {
+                    "name": "ssh"
+                }
+            ]
         },
         {
             "id": "internal_app",
-            "open_ports": [
-                8080,
-                3389,
-                22
-            ],
             "services": [
-                "tomcat",
-                "rdp",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "tomcat",
+                    "port": 8080,
+                    "depends_on": [
+                        "mysql"
+                    ]
+                },
+                {
+                    "name": "rdp",
+                    "port": 3389
+                },
+                {
+                    "name": "ssh"
+                }
+            ]
         },
         {
             "id": "admin_jump",
-            "open_ports": [
-                5900,
-                69,
-                22
-            ],
             "services": [
-                "vnc",
-                "tftp",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "vnc",
+                    "port": 5900
+                },
+                {
+                    "name": "tftp",
+                    "port": 69
+                },
+                {
+                    "name": "ssh"
+                }
+            ]
         },
         {
             "id": "legacy_server",
-            "open_ports": [
-                23,
-                139,
-                22
-            ],
             "services": [
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "telnet",
+                    "port": 23
+                },
+                {
+                    "name": "netbios",
+                    "port": 139
+                },
+                {
+                    "name": "ssh"
+                }
+            ]
         },
         {
             "id": "db_primary",
-            "open_ports": [
-                3306,
-                22
-            ],
             "services": [
-                "mysql",
-                "ssh"
-            ],
-            "critical": true
+                {
+                    "name": "mysql",
+                    "critical": true
+                },
+                {
+                    "name": "ssh"
+                }
+            ]
         }
     ],
     "policy": {
@@ -94,109 +114,6 @@
             3389,
             5900,
             69
-        ],
-        "critical_services": {
-            "db_primary": [
-                "mysql"
-            ]
-        }
-    },
-    "service_port_mapping": {
-        "http": [
-            80
-        ],
-        "https": [
-            443
-        ],
-        "ssh": [
-            22
-        ],
-        "mysql": [
-            3306
-        ],
-        "postgresql": [
-            5432
-        ],
-        "redis": [
-            6379
-        ],
-        "mongodb": [
-            27017
-        ],
-        "ftp": [
-            21
-        ],
-        "telnet": [
-            23
-        ],
-        "smtp": [
-            25
-        ],
-        "pop3": [
-            110
-        ],
-        "imap": [
-            143
-        ],
-        "tomcat": [
-            8080
-        ],
-        "nodejs": [
-            3000
-        ],
-        "rabbitmq": [
-            5672
-        ],
-        "prometheus": [
-            9090
-        ],
-        "grafana": [
-            3000
-        ],
-        "elasticsearch": [
-            9200
-        ],
-        "kibana": [
-            5601
-        ],
-        "smb": [
-            445
-        ],
-        "netbios": [
-            139
-        ],
-        "rdp": [
-            3389
-        ],
-        "vnc": [
-            5900
-        ],
-        "nfs": [
-            2049
-        ],
-        "ldap": [
-            389
-        ],
-        "rsync": [
-            873
-        ],
-        "snmp": [
-            161
-        ],
-        "tftp": [
-            69
         ]
-    },
-    "service_dependencies": {
-        "dmz_web": {
-            "http": [
-                "tomcat"
-            ]
-        },
-        "internal_app": {
-            "tomcat": [
-                "mysql"
-            ]
-        }
     }
 }

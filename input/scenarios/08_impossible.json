@@ -1,115 +1,24 @@
 {
     "scenario_name": "08_impossible",
-    "description": "Scenario irrisolvibile (test robustezza)",
+    "description": "Scenario impossibile da risolvere: c'è un host con un servizio critico che utilizza una porta proibita, e non ci sono altre azioni possibili per mitigare il rischio.",
     "hosts": [
         {
             "id": "critical_legacy",
-            "open_ports": [
-                3306,
-                22
-            ],
             "services": [
-                "mysql",
-                "ssh"
-            ],
-            "critical": true
+                {
+                    "name": "mysql",
+                    "port": 3306,
+                    "critical": true
+                },
+                {
+                    "name": "ssh"
+                }
+            ]
         }
     ],
     "policy": {
         "forbidden_ports": [
             3306
-        ],
-        "critical_services": {
-            "critical_legacy": [
-                "mysql"
-            ]
-        }
-    },
-    "service_port_mapping": {
-        "http": [
-            80
-        ],
-        "https": [
-            443
-        ],
-        "ssh": [
-            22
-        ],
-        "mysql": [
-            3306
-        ],
-        "postgresql": [
-            5432
-        ],
-        "redis": [
-            6379
-        ],
-        "mongodb": [
-            27017
-        ],
-        "ftp": [
-            21
-        ],
-        "telnet": [
-            23
-        ],
-        "smtp": [
-            25
-        ],
-        "pop3": [
-            110
-        ],
-        "imap": [
-            143
-        ],
-        "tomcat": [
-            8080
-        ],
-        "nodejs": [
-            3000
-        ],
-        "rabbitmq": [
-            5672
-        ],
-        "prometheus": [
-            9090
-        ],
-        "grafana": [
-            3000
-        ],
-        "elasticsearch": [
-            9200
-        ],
-        "kibana": [
-            5601
-        ],
-        "smb": [
-            445
-        ],
-        "netbios": [
-            139
-        ],
-        "rdp": [
-            3389
-        ],
-        "vnc": [
-            5900
-        ],
-        "nfs": [
-            2049
-        ],
-        "ldap": [
-            389
-        ],
-        "rsync": [
-            873
-        ],
-        "snmp": [
-            161
-        ],
-        "tftp": [
-            69
         ]
-    },
-    "service_dependencies": {}
+    }
 }

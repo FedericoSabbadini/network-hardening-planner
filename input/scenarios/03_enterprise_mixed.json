@@ -4,114 +4,149 @@
     "hosts": [
         {
             "id": "web1",
-            "open_ports": [
-                80,
-                443,
-                22
-            ],
             "services": [
-                "http",
-                "https",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "http",
+                    "port": 80,
+                    "depends_on": [
+                        "tomcat"
+                    ]
+                },
+                {
+                    "name": "https",
+                    "port": 443
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                }
+            ]
         },
         {
             "id": "web2",
-            "open_ports": [
-                80,
-                443,
-                22
-            ],
             "services": [
-                "http",
-                "https",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "http",
+                    "port": 80,
+                    "depends_on": [
+                        "tomcat"
+                    ]
+                },
+                {
+                    "name": "https",
+                    "port": 443
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                }
+            ]
         },
         {
             "id": "app1",
-            "open_ports": [
-                8080,
-                21,
-                161,
-                22
-            ],
             "services": [
-                "tomcat",
-                "ftp",
-                "snmp",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "tomcat",
+                    "port": 8080,
+                    "depends_on": [
+                        "mysql"
+                    ]
+                },
+                {
+                    "name": "ftp",
+                    "port": 21
+                },
+                {
+                    "name": "snmp",
+                    "port": 161
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                }
+            ]
         },
         {
             "id": "app2",
-            "open_ports": [
-                8080,
-                21,
-                22
-            ],
             "services": [
-                "tomcat",
-                "ftp",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "tomcat",
+                    "port": 8080,
+                    "depends_on": [
+                        "mysql"
+                    ]
+                },
+                {
+                    "name": "ftp",
+                    "port": 21
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                }
+            ]
         },
         {
             "id": "db_master",
-            "open_ports": [
-                3306,
-                22,
-                23
-            ],
             "services": [
-                "mysql",
-                "ssh"
-            ],
-            "critical": true
+                {
+                    "name": "mysql",
+                    "port": 3306,
+                    "critical": true
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                }
+            ]
         },
         {
             "id": "db_slave",
-            "open_ports": [
-                3306,
-                22,
-                139
-            ],
             "services": [
-                "mysql",
-                "ssh"
-            ],
-            "critical": true
+                {
+                    "name": "mysql",
+                    "port": 3306,
+                    "critical": true
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                }
+            ]
         },
         {
             "id": "storage",
-            "open_ports": [
-                445,
-                139,
-                22
-            ],
             "services": [
-                "smb",
-                "netbios",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "smb",
+                    "port": 445
+                },
+                {
+                    "name": "netbios",
+                    "port": 139
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                }
+            ]
         },
         {
             "id": "monitoring",
-            "open_ports": [
-                9090,
-                22,
-                23
-            ],
             "services": [
-                "prometheus",
-                "ssh"
-            ],
-            "critical": false
+                {
+                    "name": "prometheus",
+                    "port": 9090
+                },
+                {
+                    "name": "ssh",
+                    "port": 22
+                },
+                {
+                    "name": "telnet",
+                    "port": 23
+                }
+            ]
         }
     ],
     "policy": {
@@ -121,122 +156,6 @@
             23,
             139,
             161
-        ],
-        "critical_services": {
-            "db_master": [
-                "mysql"
-            ],
-            "db_slave": [
-                "mysql"
-            ]
-        }
-    },
-    "service_port_mapping": {
-        "http": [
-            80
-        ],
-        "https": [
-            443
-        ],
-        "ssh": [
-            22
-        ],
-        "mysql": [
-            3306
-        ],
-        "postgresql": [
-            5432
-        ],
-        "redis": [
-            6379
-        ],
-        "mongodb": [
-            27017
-        ],
-        "ftp": [
-            21
-        ],
-        "telnet": [
-            23
-        ],
-        "smtp": [
-            25
-        ],
-        "pop3": [
-            110
-        ],
-        "imap": [
-            143
-        ],
-        "tomcat": [
-            8080
-        ],
-        "nodejs": [
-            3000
-        ],
-        "rabbitmq": [
-            5672
-        ],
-        "prometheus": [
-            9090
-        ],
-        "grafana": [
-            3000
-        ],
-        "elasticsearch": [
-            9200
-        ],
-        "kibana": [
-            5601
-        ],
-        "smb": [
-            445
-        ],
-        "netbios": [
-            139
-        ],
-        "rdp": [
-            3389
-        ],
-        "vnc": [
-            5900
-        ],
-        "nfs": [
-            2049
-        ],
-        "ldap": [
-            389
-        ],
-        "rsync": [
-            873
-        ],
-        "snmp": [
-            161
-        ],
-        "tftp": [
-            69
         ]
-    },
-    "service_dependencies": {
-        "web1": {
-            "http": [
-                "tomcat"
-            ]
-        },
-        "web2": {
-            "http": [
-                "tomcat"
-            ]
-        },
-        "app1": {
-            "tomcat": [
-                "mysql"
-            ]
-        },
-        "app2": {
-            "tomcat": [
-                "mysql"
-            ]
-        }
     }
 }
