@@ -6,18 +6,18 @@
             "id": "web1",
             "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80,
                     "depends_on": [
                         "tomcat"
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
@@ -26,18 +26,18 @@
             "id": "web2",
             "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80,
                     "depends_on": [
                         "tomcat"
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
@@ -46,22 +46,22 @@
             "id": "app1",
             "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080,
                     "depends_on": [
                         "mysql"
                     ]
                 },
                 {
-                    "name": "ftp",
+                    "service": "ftp",
                     "port": 21
                 },
                 {
-                    "name": "snmp",
+                    "service": "snmp",
                     "port": 161
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
@@ -70,18 +70,18 @@
             "id": "app2",
             "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080,
                     "depends_on": [
                         "mysql"
                     ]
                 },
                 {
-                    "name": "ftp",
+                    "service": "ftp",
                     "port": 21
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
@@ -156,6 +156,10 @@
             23,
             139,
             161
+        ],
+        "forbidden_services": [
+            "ftp",
+            "telnet"
         ]
     }
 }

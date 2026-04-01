@@ -11,7 +11,8 @@
                     "critical": true
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         }
@@ -19,6 +20,7 @@
     "policy": {
         "forbidden_ports": [
             3306
-        ]
+        ],
+        "forbidden_services": []
     }
 }

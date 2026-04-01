@@ -38,7 +38,7 @@
         },
         {
             "id": "legacy",
-            "services": [
+            "features": [
                 {
                     "service": "ssh",
                     "port": 22
@@ -55,6 +55,7 @@
             80,
             139,
             23
-        ]
+        ],
+        "forbidden_services": []
     }
 }

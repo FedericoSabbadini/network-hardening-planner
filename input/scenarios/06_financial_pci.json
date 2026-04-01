@@ -17,7 +17,8 @@
                     "port": 443
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -37,7 +38,8 @@
                     ]
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -54,7 +56,8 @@
                     "port": 69
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -76,7 +79,8 @@
                     "critical": true
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -92,7 +96,8 @@
                     "port": 161
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -109,7 +114,8 @@
                     "port": 23
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -126,7 +132,8 @@
                     "port": 139
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -142,7 +149,8 @@
                     "port": 5900
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -158,7 +166,8 @@
                     "port": 5601
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 },
                 {
                     "service": "telnet",
@@ -176,6 +185,12 @@
             69,
             3389,
             5900
+        ],
+        "forbidden_services": [
+            "ftp",
+            "telnet",
+            "tftp",
+            "snmp"
         ]
     }
 }

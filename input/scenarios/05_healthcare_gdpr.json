@@ -17,7 +17,8 @@
                     "port": 443
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -38,7 +39,8 @@
                     "critical": true
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -54,7 +56,8 @@
                     "port": 23
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -63,10 +66,12 @@
             "features": [
                 {
                     "service": "postgresql",
-                    "critical": true
+                    "critical": true,
+                    "port": 5432
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -82,7 +87,8 @@
                     "port": 139
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -98,7 +104,8 @@
                     "port": 161
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         },
@@ -107,14 +114,16 @@
             "features": [
                 {
                     "service": "mysql",
-                    "critical": true
+                    "critical": true,
+                    "port": 3306
                 },
                 {
                     "service": "netbios",
                     "port": 139
                 },
                 {
-                    "service": "ssh"
+                    "service": "ssh",
+                    "port": 22
                 }
             ]
         }
@@ -127,6 +136,12 @@
             139,
             161,
             3389
+        ],
+        "forbidden_services": [
+            "ftp",
+            "telnet",
+            "tftp",
+            "snmp"
         ]
     }
 }
