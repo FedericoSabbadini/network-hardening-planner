@@ -4,7 +4,7 @@
     "hosts": [
         {
             "id": "web1",
-            "services": [
+            "features": [
                 {
                     "name": "http",
                     "port": 80,
@@ -24,7 +24,7 @@
         },
         {
             "id": "web2",
-            "services": [
+            "features": [
                 {
                     "name": "http",
                     "port": 80,
@@ -44,7 +44,7 @@
         },
         {
             "id": "app1",
-            "services": [
+            "features": [
                 {
                     "name": "tomcat",
                     "port": 8080,
@@ -68,7 +68,7 @@
         },
         {
             "id": "app2",
-            "services": [
+            "features": [
                 {
                     "name": "tomcat",
                     "port": 8080,
@@ -88,62 +88,62 @@
         },
         {
             "id": "db_master",
-            "services": [
+            "features": [
                 {
-                    "name": "mysql",
+                    "service": "mysql",
                     "port": 3306,
                     "critical": true
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
         },
         {
             "id": "db_slave",
-            "services": [
+            "features": [
                 {
-                    "name": "mysql",
+                    "service": "mysql",
                     "port": 3306,
                     "critical": true
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
         },
         {
             "id": "storage",
-            "services": [
+            "features": [
                 {
-                    "name": "smb",
+                    "service": "smb",
                     "port": 445
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
         },
         {
             "id": "monitoring",
-            "services": [
+            "features": [
                 {
-                    "name": "prometheus",
+                    "service": "prometheus",
                     "port": 9090
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 }
             ]

@@ -4,34 +4,34 @@
     "hosts": [
         {
             "id": "web1",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
         },
         {
             "id": "fileserver",
-            "services": [
+            "features": [
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "smb",
+                    "service": "smb",
                     "port": 445
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
@@ -40,11 +40,11 @@
             "id": "legacy",
             "services": [
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 }
             ]

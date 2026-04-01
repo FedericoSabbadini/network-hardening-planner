@@ -4,67 +4,67 @@
     "hosts": [
         {
             "id": "frontend",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80,
                     "depends_on": [
                         "tomcat"
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
         },
         {
             "id": "backend",
-            "services": [
+            "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080,
                     "depends_on": [
                         "mysql"
                     ]
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
         },
         {
             "id": "mailserver",
-            "services": [
+            "features": [
                 {
-                    "name": "smtp",
+                    "service": "smtp",
                     "port": 25
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 }
             ]
         },
         {
             "id": "database",
-            "services": [
+            "features": [
                 {
-                    "name": "mysql",
+                    "service": "mysql",
                     "port": 3306,
                     "critical": true
                 },
                 {
-                    "name": "ssh",
+                    "service": "ssh",
                     "port": 22
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 }
             ]

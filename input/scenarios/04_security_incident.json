@@ -4,103 +4,103 @@
     "hosts": [
         {
             "id": "dmz_web",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80,
                     "depends_on": [
                         "tomcat"
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "dmz_mail",
-            "services": [
+            "features": [
                 {
-                    "name": "smtp",
+                    "service": "smtp",
                     "port": 25
                 },
                 {
-                    "name": "pop3",
+                    "service": "pop3",
                     "port": 110
                 },
                 {
-                    "name": "imap",
+                    "service": "imap",
                     "port": 143
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "internal_app",
-            "services": [
+            "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080,
                     "depends_on": [
                         "mysql"
                     ]
                 },
                 {
-                    "name": "rdp",
+                    "service": "rdp",
                     "port": 3389
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "admin_jump",
-            "services": [
+            "features": [
                 {
-                    "name": "vnc",
+                    "service": "vnc",
                     "port": 5900
                 },
                 {
-                    "name": "tftp",
+                    "service": "tftp",
                     "port": 69
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "legacy_server",
-            "services": [
+            "features": [
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "db_primary",
-            "services": [
+            "features": [
                 {
-                    "name": "mysql",
+                    "service": "mysql",
                     "critical": true
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         }

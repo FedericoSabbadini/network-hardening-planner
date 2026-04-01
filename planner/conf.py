@@ -84,6 +84,6 @@ ALTERNATIVE_PORTS = {
 # Assigns a cost to each mitigation action to aid in strategy evaluation
 ACTION_COSTS = {
     'close_port': 1,       # Low cost: simple operation, no impact
-    'deactivate_service': 5, # High cost: causes service downtime!
-    'migrate_service': 3      # Medium cost: requires reconfiguration but no downtime
+    'disable_service': 5,  # High cost: causes service downtime!
+    'migrate_service': 3   # Medium cost: requires reconfiguration but no downtime
 }

@@ -4,28 +4,28 @@
     "hosts": [
         {
             "id": "patient_portal",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80,
                     "depends_on": [
                         "tomcat"
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "ehr_app",
-            "services": [
+            "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080,
                     "critical": true,
                     "depends_on": [
@@ -33,88 +33,88 @@
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443,
                     "critical": true
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "legacy_gateway",
-            "services": [
+            "features": [
                 {
-                    "name": "smtp",
+                    "service": "smtp",
                     "port": 25
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "patient_db",
-            "services": [
+            "features": [
                 {
-                    "name": "postgresql",
+                    "service": "postgresql",
                     "critical": true
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "medical_files",
-            "services": [
+            "features": [
                 {
-                    "name": "smb",
+                    "service": "smb",
                     "port": 445
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "admin_ws",
-            "services": [
+            "features": [
                 {
-                    "name": "rdp",
+                    "service": "rdp",
                     "port": 3389
                 },
                 {
-                    "name": "snmp",
+                    "service": "snmp",
                     "port": 161
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "audit_db",
-            "services": [
+            "features": [
                 {
-                    "name": "mysql",
+                    "service": "mysql",
                     "critical": true
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         }

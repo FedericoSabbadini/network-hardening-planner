@@ -4,14 +4,14 @@
     "hosts": [
         {
             "id": "critical_legacy",
-            "services": [
+            "features": [
                 {
-                    "name": "mysql",
+                    "service": "mysql",
                     "port": 3306,
                     "critical": true
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         }

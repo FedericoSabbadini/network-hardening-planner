@@ -56,31 +56,31 @@ class NetworkHardeningDomain:
         # 3 actions are defined in the domain, to allow for changes in the state of the world. 
         # Each action has parameters, preconditions that must be satisfied for the action to be applicable, and effects that describe how the action changes the state of the world.
 
-        # ------ 1. deactivate_service(host, service) ------
+        # ------ 1. disable_service(host, service) ------
         # Action interface
-        deactivate_service_action = InstantaneousAction('deactivate_service', host=Host, service=Service)
+        disable_service_action = InstantaneousAction('disable_service', host=Host, service=Service)
         # Action parameters
-        h = deactivate_service_action.parameter('host')
-        s = deactivate_service_action.parameter('service')
+        h = disable_service_action.parameter('host')
+        s = disable_service_action.parameter('service')
         # Action preconditions
-        deactivate_service_action.add_precondition(service_active(h, s)) # the service must be active to be deactivated
-        deactivate_service_action.add_precondition(Not(service_critical(h, s))) # the service must not be critical to be deactivated (i.e., it can be safely deactivated without causing major issues to the host)
+        disable_service_action.add_precondition(service_active(h, s)) # the service must be active to be disabled
+        disable_service_action.add_precondition(Not(service_critical(h, s))) # the service must not be critical to be disabled (i.e., it can be safely disabled without causing major issues to the host)
 
         s2 = Variable('s2', Service)
         h2 = Variable('h2', Host)
-        deactivate_service_action.add_precondition( # if there is a service s2 on host h2 so that service s on host h depends to it, s2 must not be active in order to deactivate s
+        disable_service_action.add_precondition( # if there is a service s2 on host h2 so that service s on host h depends to it, s2 must not be active in order to disable s
             Forall(
                 s2, h2,
                 Implies(
-                    depends_on(h2, s2, s), # if there is a service s2 on host h2 so that service s on host h depends to it, s2 must not be active in order to deactivate s
+                    depends_on(h2, s2, s), # if there is a service s2 on host h2 so that service s on host h depends to it, s2 must not be active in order to disable s
                     Not(service_active(h2, s2)) # s2 must not be active
                 )
             )
         )
         # Action effects
-        deactivate_service_action.add_effect(service_active(h, s), False)
+        disable_service_action.add_effect(service_active(h, s), False)
 
-        self.problem.add_action(deactivate_service_action)
+        self.problem.add_action(disable_service_action)
 
 
         # ------ 2. close_port(host, port) ------
@@ -128,3 +128,20 @@ class NetworkHardeningDomain:
         migrate_service_action.add_effect(service_uses_port(h, s, p_new), True)
 
         self.problem.add_action(migrate_service_action)
+        self.actions = {
+            'disable_service': disable_service_action,
+            'close_port': close_port_action,
+            'migrate_service': migrate_service_action
+        }
+
+    def get_problem(self):
+        return self.problem
+    
+    def get_types(self):
+        return self.types
+    
+    def get_fluents(self):
+        return self.fluents
+    
+    def get_actions(self):
+        return self.actions

@@ -4,32 +4,32 @@
     "hosts": [
         {
             "id": "web_banking",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80,
                     "depends_on": [
                         "nodejs"
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "api_gateway",
-            "services": [
+            "features": [
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "nodejs",
+                    "service": "nodejs",
                     "port": 3000,
                     "depends_on": [
                         "tomcat",
@@ -37,32 +37,32 @@
                     ]
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "core_banking",
-            "services": [
+            "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080,
                     "critical": true
                 },
                 {
-                    "name": "tftp",
+                    "service": "tftp",
                     "port": 69
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "tx_processor",
-            "services": [
+            "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080,
                     "critical": true,
                     "depends_on": [
@@ -71,97 +71,97 @@
                     ]
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443,
                     "critical": true
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "mq_cluster",
-            "services": [
+            "features": [
                 {
-                    "name": "rabbitmq",
+                    "service": "rabbitmq",
                     "port": 5672
                 },
                 {
-                    "name": "snmp",
+                    "service": "snmp",
                     "port": 161
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "accounts_db",
-            "services": [
+            "features": [
                 {
-                    "name": "postgresql",
+                    "service": "postgresql",
                     "port": 5432,
                     "critical": true
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "tx_db",
-            "services": [
+            "features": [
                 {
-                    "name": "postgresql",
+                    "service": "postgresql",
                     "port": 5432,
                     "critical": true
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "admin_console",
-            "services": [
+            "features": [
                 {
-                    "name": "rdp",
+                    "service": "rdp",
                     "port": 3389
                 },
                 {
-                    "name": "vnc",
+                    "service": "vnc",
                     "port": 5900
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "security_siem",
-            "services": [
+            "features": [
                 {
-                    "name": "elasticsearch",
+                    "service": "elasticsearch",
                     "port": 9200
                 },
                 {
-                    "name": "kibana",
+                    "service": "kibana",
                     "port": 5601
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 }
             ]

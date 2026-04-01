@@ -4,240 +4,240 @@
     "hosts": [
         {
             "id": "web1",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "web2",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "web3",
-            "services": [
+            "features": [
                 {
-                    "name": "http",
+                    "service": "http",
                     "port": 80
                 },
                 {
-                    "name": "https",
+                    "service": "https",
                     "port": 443
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "app1",
-            "services": [
+            "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080
                 },
                 {
-                    "name": "ftp",
+                    "service": "ftp",
                     "port": 21
                 },
                 {
-                    "name": "snmp",
+                    "service": "snmp",
                     "port": 161
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "app2",
-            "services": [
+            "features": [
                 {
-                    "name": "tomcat",
+                    "service": "tomcat",
                     "port": 8080
                 },
                 {
-                    "name": "ftp",
+                    "service": "ftp",
                     "port": 21
                 },
                 {
-                    "name": "snmp",
+                    "service": "snmp",
                     "port": 161
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "storage1",
-            "services": [
+            "features": [
                 {
-                    "name": "smb",
+                    "service": "smb",
                     "port": 445
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "storage2",
-            "services": [
+            "features": [
                 {
-                    "name": "smb",
+                    "service": "smb",
                     "port": 445
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "mail1",
-            "services": [
+            "features": [
                 {
-                    "name": "smtp",
+                    "service": "smtp",
                     "port": 25
                 },
                 {
-                    "name": "pop3",
+                    "service": "pop3",
                     "port": 110
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "mail2",
-            "services": [
+            "features": [
                 {
-                    "name": "smtp",
+                    "service": "smtp",
                     "port": 25
                 },
                 {
-                    "name": "imap",
+                    "service": "imap",
                     "port": 143
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "admin1",
-            "services": [
+            "features": [
                 {
-                    "name": "rdp",
+                    "service": "rdp",
                     "port": 3389
                 },
                 {
-                    "name": "vnc",
+                    "service": "vnc",
                     "port": 5900
                 },
                 {
-                    "name": "tftp",
+                    "service": "tftp",
                     "port": 69
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "admin2",
-            "services": [
+            "features": [
                 {
-                    "name": "rdp",
+                    "service": "rdp",
                     "port": 3389
                 },
                 {
-                    "name": "vnc",
+                    "service": "vnc",
                     "port": 5900
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "db1",
-            "services": [
+            "features": [
                 {
-                    "name": "mysql",
+                    "service": "mysql",
                     "port": 3306,
                     "critical": true
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "db2",
-            "services": [
+            "features": [
                 {
-                    "name": "postgresql",
+                    "service": "postgresql",
                     "port": 5432,
                     "critical": true
                 },
                 {
-                    "name": "telnet",
+                    "service": "telnet",
                     "port": 23
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         },
         {
             "id": "db3",
-            "services": [
+            "features": [
                 {
-                    "name": "mongodb",
+                    "service": "mongodb",
                     "port": 27017,
                     "critical": true
                 },
                 {
-                    "name": "netbios",
+                    "service": "netbios",
                     "port": 139
                 },
                 {
-                    "name": "ssh"
+                    "service": "ssh"
                 }
             ]
         }
