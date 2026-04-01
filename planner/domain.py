@@ -29,8 +29,6 @@ class NetworkHardeningDomain:
             'Port': Port, 
             'Service': Service
         }
-        for type_name, type_obj in self.types.items():
-            self.problem.add_type(type_obj)
 
 
         # ========= FLUENTS DEFINITION =========
@@ -39,6 +37,7 @@ class NetworkHardeningDomain:
         service_critical = Fluent('service_critical', BoolType(), host=Host, service=Service) # service_critical(host, service) = True if the specified service is critical for the specified host (i.e., it is essential for the host's operation or security)
         service_uses_port = Fluent('service_uses_port', BoolType(), host=Host, service=Service, port=Port) # service_uses_port(host, service, port) = True if the specified service on the specified host uses the specified port (i.e., it listens on that port for incoming connections)
         depends_on = Fluent('depends_on', BoolType(), host=Host, dependent_service=Service, base_service=Service) # depends_on(host, dependent_service, base_service) = True if the specified dependent service on the specified host depends on the specified service active on some other host (i.e., it requires the base service to be active in order to function properly)
+        migrate_possibility = Fluent('migrate_possibility', BoolType(), host=Host, service=Service, port_old=Port, port_new=Port) # migrate_possibility(host, service, port_old, port_new) = True if it is possible to migrate the specified service on the specified host from the old port to the new port (i.e., the service can be reconfigured to use the new port without issues and the new port is not currently used by another active service on the same host)
         # Define fluents (facts/predicates) used in the domain, to describe the state of the world
         # They are boolean predicates that can be true or false, and have parameters (e.g., host, port, service)
         self.fluents = {
@@ -46,7 +45,8 @@ class NetworkHardeningDomain:
             'service_active': service_active,
             'service_critical': service_critical,
             'service_uses_port': service_uses_port,
-            'depends_on': depends_on
+            'depends_on': depends_on,
+            'migrate_possibility': migrate_possibility
         }
         for fluent in self.fluents.values():
             self.problem.add_fluent(fluent, default_initial_value=False)
@@ -70,15 +70,26 @@ class NetworkHardeningDomain:
         h2 = Variable('h2', Host)
         disable_service_action.add_precondition( # if there is a service s2 on host h2 so that service s on host h depends to it, s2 must not be active in order to disable s
             Forall(
-                s2, h2,
                 Implies(
                     depends_on(h2, s2, s), # if there is a service s2 on host h2 so that service s on host h depends to it, s2 must not be active in order to disable s
                     Not(service_active(h2, s2)) # s2 must not be active
-                )
+                ), s2, h2
             )
         )
         # Action effects
         disable_service_action.add_effect(service_active(h, s), False)
+        p = Variable('p', Port) # per le porte su cui il servizio s su host h è attivo, service uses port False
+        disable_service_action.add_effect( # for each port p used by service s on host h, service_uses_port(h, s, p) becomes False (i.e., the service is no longer using that port because it is disabled)
+            service_uses_port(h, s, p), # for each port p used by service s on host h
+            False,
+            forall=[p]
+        )
+        sdependent = Variable('sdependent', Service)
+        disable_service_action.add_effect(
+            depends_on(h, s, sdependent),  # fluent
+            False,                         # value
+            forall=[sdependent]            # quantificazione
+        )
 
         self.problem.add_action(disable_service_action)
 
@@ -95,11 +106,10 @@ class NetworkHardeningDomain:
         s = Variable('s', Service)
         close_port_action.add_precondition( # if there is a service s on host h that uses port p, s must not be active in order to close p
             Forall(
-                s,
                 Implies(
                     service_uses_port(h, s, p),
                     Not(service_active(h, s))
-                )
+                ), s
             )
         )
         # Action effects
@@ -117,15 +127,17 @@ class NetworkHardeningDomain:
         p_old = migrate_service_action.parameter('p_old')
         p_new = migrate_service_action.parameter('p_new')
         # Action preconditions
+        migrate_service_action.add_precondition(migrate_possibility(h, s, p_old, p_new)) # the migration must be possible to be performed
         migrate_service_action.add_precondition(service_active(h, s)) # the service must be active to be migrated
         migrate_service_action.add_precondition(open_port(h, p_old)) # the old port must be open to be migrated
         migrate_service_action.add_precondition(Not(open_port(h, p_new))) # the new port must be closed to be migrated
         migrate_service_action.add_precondition(service_uses_port(h, s, p_old)) # the service must use the old port to be migrated
         # Action effects
-        migrate_service_action.add_effect(open_port(h, p_old), False)
         migrate_service_action.add_effect(open_port(h, p_new), True)
         migrate_service_action.add_effect(service_uses_port(h, s, p_old), False)
         migrate_service_action.add_effect(service_uses_port(h, s, p_new), True)
+        migrate_service_action.add_effect(migrate_possibility(h, s, p_old, p_new), False)
+        migrate_service_action.add_effect(migrate_possibility(h, s, p_new, p_old), True)
 
         self.problem.add_action(migrate_service_action)
         self.actions = {
