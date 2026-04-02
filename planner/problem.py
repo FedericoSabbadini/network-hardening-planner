@@ -14,6 +14,8 @@ class NetworkHardeningProblem:
 
         self.forbiddenP = scenario['policy'].get('forbidden_ports', [])
         self.forbiddenS = scenario['policy'].get('forbidden_services', [])
+        self.serv_ports = SERVICE_PORTS.copy()
+
 
         self.host_service_ports = {}
         self.host_open_ports = {}
@@ -44,6 +46,8 @@ class NetworkHardeningProblem:
         for port in self.forbiddenP:
             if port in ALTERNATIVE_PORTS:
                 all_ports.add(ALTERNATIVE_PORTS[port])
+        for port in SERVICE_PORTS:
+            all_ports.add(port)
 
         for port in sorted(all_ports):
             key = f'port_{port}'
@@ -95,7 +99,8 @@ class NetworkHardeningProblem:
                             self.problem.set_initial_value(
                                 fluents['migrate_possibility'](host_obj, service_obj, port_obj, alt_port_obj), True
                             )
-                        
+
+
 
             # SERVICE_CRITICAL, SERVICE_VULNERABLE, DEPENDS_ON
             for feature in host.get('features', []):
@@ -145,6 +150,15 @@ class NetworkHardeningProblem:
                             fluents['port_forbidden'](port_obj), True
                         )
 
+        for port in SERVICE_PORTS:
+            if port in self.forbiddenP:
+                continue
+            port_obj = self.objects.get(f'port_{port}')
+            if port_obj is not None:
+                self.problem.set_initial_value(
+                    fluents['open_possibility'](port_obj), True
+                )
+
 
     def setup_goal(self):
         fluents = self.domain.get_fluents()
@@ -176,8 +190,11 @@ class NetworkHardeningProblem:
                 if port in self.forbiddenP and service_name not in self.forbiddenS and service_obj is not None:
                     alt_port = ALTERNATIVE_PORTS.get(port)
                     alt_port_obj = self.objects.get(f'port_{alt_port}')
+                    serv_port = self.serv_ports.pop(0) if self.serv_ports else None
                     if alt_port_obj is not None and alt_port not in self.forbiddenP:
                         self.problem.add_goal( fluents['service_uses_port'](host_obj, service_obj, alt_port_obj) )
+                    elif serv_port is not None:
+                        self.problem.add_goal( fluents['service_uses_port'](host_obj, service_obj, self.objects[f'port_{serv_port}']) )
 
         # ACTION COSTS
         cost_map = {}
@@ -191,6 +208,8 @@ class NetworkHardeningProblem:
                 cost_map[action] = Int(ACTION_COSTS['migrate_service'])
             elif 'patch_service' in name:
                 cost_map[action] = Int(ACTION_COSTS['patch_service'])
+            elif 'reuse_service' in name:
+                cost_map[action] = Int(ACTION_COSTS['reuse_service']) # se reuse_service non è definita nei costi, assegna un costo di default (es. 1)
 
         if cost_map:
             self.problem.add_quality_metric(MinimizeActionCosts(cost_map, default=Int(1)))

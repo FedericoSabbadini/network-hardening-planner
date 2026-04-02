@@ -35,6 +35,7 @@ class NetworkHardeningDomain:
 
         migrate_possibility = Fluent('migrate_possibility', BoolType(),
                                      host=Host, service=Service, port_old=Port, port_new=Port)
+        open_possibility = Fluent('open_possibility', BoolType(), port=Port) # open_possibility(host, service, port) = True se è possibile aprire la porta port su host e farla usare da service (cioè se port è un'alternativa a una porta forbidden usata da service, o se port è una porta libera che non è forbidden)
         service_vulnerable = Fluent('service_vulnerable', BoolType(), host=Host, service=Service)
 
         port_forbidden = Fluent('port_forbidden', BoolType(), port=Port) # port_forbidden(port) = True se la porta è proibita da firewall o policy aziendale (es. per motivi di sicurezza), e quindi non può essere usata da nessun servizio su quel host
@@ -49,7 +50,8 @@ class NetworkHardeningDomain:
             'migrate_possibility': migrate_possibility,
             'service_vulnerable': service_vulnerable,
             'port_forbidden': port_forbidden,
-            'service_forbidden': service_forbidden
+            'service_forbidden': service_forbidden,
+            'open_possibility': open_possibility
         }
         for fluent in self.fluents.values():
             self.problem.add_fluent(fluent, default_initial_value=False)
@@ -134,12 +136,32 @@ class NetworkHardeningDomain:
 
         patch_service_action.add_effect(service_vulnerable(h, s), False)
 
+        # ------5. reuse_service
+        reuse_service_action = InstantaneousAction('reuse_service', host=Host, service=Service, port=Port)
+        h = reuse_service_action.parameter('host')
+        s = reuse_service_action.parameter('service')
+        p = reuse_service_action.parameter('port')
+
+        reuse_service_action.add_precondition(open_possibility(p))
+        p_using = Variable('p_using', Port)
+        reuse_service_action.add_precondition(
+            Forall(
+                Implies(service_uses_port(h, s, p_using), Not(open_port(h, p_using))),
+                p_using
+            )
+        )
+
+        reuse_service_action.add_effect(service_active(h, s), True)
+        reuse_service_action.add_effect(service_uses_port(h, s, p), True)
+        reuse_service_action.add_effect(open_port(h, p), True)
+        reuse_service_action.add_effect(open_possibility(p), False) # una volta aperta la porta, non è più possibile aprirla (non ha senso aprire la stessa porta più volte)
 
         self.actions = {
             'patch_service': patch_service_action, 
             'disable_service': disable_service_action,
             'migrate_service': migrate_service_action,
             'block_port_firewall': block_port_firewall_action,
+            'reuse_service': reuse_service_action
         }
         for action in self.actions.values():
             self.problem.add_action(action)
