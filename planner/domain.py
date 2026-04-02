@@ -84,16 +84,6 @@ class NetworkHardeningDomain:
         p = block_port_firewall_action.parameter('port')
         s = block_port_firewall_action.parameter('service')
 
-        # non deve essere possibile fare una migrazione su un'altra porta NON FORBIDDEN per il servizio s NON FORBIDDEN, altrimenti sarebbe preferibile migrare invece di bloccare la porta
-        p_mig = Variable('p_mig', Port)
-        block_port_firewall_action.add_precondition(
-            Forall(
-                Implies(migrate_possibility(h, s, p, p_mig),
-                Not(And(Not(port_forbidden(p_mig)), Not(service_forbidden(s))))),
-                p_mig
-            )
-        )
-
         block_port_firewall_action.add_precondition(open_port(h, p))
         block_port_firewall_action.add_precondition(service_uses_port(h, s, p)) 
         block_port_firewall_action.add_precondition(Not(service_critical(h, s))) # il servizio che usa la porta non deve essere critico (altrimenti bloccare la porta causerebbe un downtime critico
@@ -132,7 +122,6 @@ class NetworkHardeningDomain:
         migrate_service_action.add_effect(service_uses_port(h, s, p_new), True)
         migrate_service_action.add_effect(service_uses_port(h, s, p_old), False)
         migrate_service_action.add_effect(migrate_possibility(h, s, p_old, p_new), False)
-
 
         # ------ 4. patch_service(host, service) ------
         patch_service_action = InstantaneousAction('patch_service', host=Host, service=Service)

@@ -1,7 +1,7 @@
 from unified_planning.shortcuts import Not, MinimizeActionCosts, Object, Compiler, OneshotPlanner, Int
 from unified_planning.engines import CompilationKind
 from .domain import NetworkHardeningDomain
-from .conf import ALTERNATIVE_PORTS, ACTION_COSTS
+from .conf import ALTERNATIVE_PORTS, ACTION_COSTS, SERVICE_PORTS
 
 
 class NetworkHardeningProblem:
@@ -95,6 +95,7 @@ class NetworkHardeningProblem:
                             self.problem.set_initial_value(
                                 fluents['migrate_possibility'](host_obj, service_obj, port_obj, alt_port_obj), True
                             )
+                        
 
             # SERVICE_CRITICAL, SERVICE_VULNERABLE, DEPENDS_ON
             for feature in host.get('features', []):
@@ -144,6 +145,7 @@ class NetworkHardeningProblem:
                             fluents['port_forbidden'](port_obj), True
                         )
 
+
     def setup_goal(self):
         fluents = self.domain.get_fluents()
 
@@ -170,7 +172,12 @@ class NetworkHardeningProblem:
                 if service_name in self.forbiddenS and service_obj is not None:
                     self.problem.add_goal(Not(fluents['service_active'](host_obj, service_obj)))
 
-
+                # GOAL 4: service_uses_port deve essere True per tutti i servizi non forbidden che sono su porte forbidden con alternativa, se l'alternativa è non forbidden
+                if port in self.forbiddenP and service_name not in self.forbiddenS and service_obj is not None:
+                    alt_port = ALTERNATIVE_PORTS.get(port)
+                    alt_port_obj = self.objects.get(f'port_{alt_port}')
+                    if alt_port_obj is not None and alt_port not in self.forbiddenP:
+                        self.problem.add_goal( fluents['service_uses_port'](host_obj, service_obj, alt_port_obj) )
 
         # ACTION COSTS
         cost_map = {}
