@@ -1,6 +1,6 @@
 {
     "scenario_name": "02_deps_all_actions",
-    "description": "Scenario with service dependencies and all actions available.",
+    "description": "Scenario with service dependencies and all actions available. The policy forbids certain ports and services, and the critical service is mysql on the database host.",
     "hosts": [
         {
             "id": "frontend",

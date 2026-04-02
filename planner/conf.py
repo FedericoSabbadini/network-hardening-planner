@@ -1,11 +1,11 @@
 # === MITIGATION ACTION COSTS ===
-# Criteri: impatto operativo (downtime) + rischio durante l'operazione
+# Criteria: operational impact (downtime) + risk during the operation
 ACTION_COSTS = {
-    'block_port_firewall': 10,  # rende il servizio che si basa su essa indisponibile dall'esterno 
-    'patch_service':        4,  # può richiedere un downtime per applicare la patch, e c'è il rischio che la patch causi problemi imprevisti al servizio (es. incompatibilità, bug, ecc.)
-    'migrate_service':      8,   # può richiedere un downtime per migrare il servizio su una nuova porta, e c'è il rischio che la migrazione causi problemi imprevisti al servizio (es. incompatibilità, bug, ecc.)
-    'disable_service':    5 ,  # rende il servizio indisponibile completamente, con impatto operativo minore rispetto a bloccare la porta, ma con rischio minore durante l'operazione (è più semplice disabilitare un servizio che migrare o patchare)
-    'reuse_service':       20,   # può richiedere un downtime per aprire la porta e farla usare dal servizio, e c'è il rischio che l'apertura della porta causi problemi imprevisti al servizio (es. incompatibilità, bug, ecc.)
+    'block_port_firewall': 10,  # makes the service that depends on it unavailable from outside
+    'patch_service':        4,  # may require downtime to apply the patch, and there is a risk the patch may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
+    'migrate_service':      8,   # may require downtime to migrate the service to a new port, and there is a risk the migration may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
+    'disable_service':    5 ,  # makes the service completely unavailable, with lower operational impact than blocking the port, but with lower risk during operation (it is simpler to disable a service than to migrate or patch it)
+    'reuse_service':       20,   # may require downtime to open the port and let the service use it, and there is a risk opening the port may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
 }
 
 # === ALTERNATIVE PORTS ===
@@ -20,5 +20,5 @@ ALTERNATIVE_PORTS = {
     445:  4455, # smb -> smb-alt
 }
 
-# === SERVICE PORTS === usable to open services of various type / free ports
+# === SERVICE PORTS === usable to open services of various types / free ports
 SERVICE_PORTS = [9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009]
