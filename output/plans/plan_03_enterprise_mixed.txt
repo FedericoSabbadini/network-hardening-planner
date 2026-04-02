@@ -1,0 +1,17 @@
+Plan for: 03_enterprise_mixed
+==================================================
+
+  1. disable_service(web2, srv_http)
+  2. migrate_service(web1, srv_http, port_80, port_8080)
+  3. disable_service(storage, srv_netbios)
+  4. disable_service(monitoring, srv_telnet)
+  5. disable_service(app2, srv_ftp)
+  6. disable_service(app1, srv_snmp)
+  7. disable_service(app1, srv_ftp)
+  8. close_port(storage, port_139)
+  9. close_port(app1, port_161)
+ 10. close_port(web2, port_80)
+ 11. close_port(web1, port_80)
+ 12. close_port(monitoring, port_23)
+ 13. close_port(app2, port_21)
+ 14. close_port(app1, port_21)

@@ -1,0 +1,9 @@
+Plan for: 02_deps_all_actions
+==================================================
+
+  1. disable_service(mailserver, srv_smtp)
+  2. migrate_service(frontend, srv_http, port_80, port_8080)
+  3. disable_service(database, srv_telnet)
+  4. close_port(mailserver, port_25)
+  5. close_port(frontend, port_80)
+  6. close_port(database, port_23)

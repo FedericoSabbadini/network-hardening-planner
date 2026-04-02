@@ -1,0 +1,17 @@
+Plan for: 05_healthcare_gdpr
+==================================================
+
+  1. disable_service(patient_portal, srv_http)
+  2. disable_service(medical_files, srv_netbios)
+  3. disable_service(legacy_gateway, srv_telnet)
+  4. disable_service(legacy_gateway, srv_smtp)
+  5. disable_service(audit_db, srv_netbios)
+  6. disable_service(admin_ws, srv_snmp)
+  7. migrate_service(admin_ws, srv_rdp, port_3389, port_33389)
+  8. close_port(admin_ws, port_161)
+  9. close_port(medical_files, port_139)
+ 10. close_port(legacy_gateway, port_25)
+ 11. close_port(audit_db, port_139)
+ 12. close_port(patient_portal, port_80)
+ 13. close_port(legacy_gateway, port_23)
+ 14. close_port(admin_ws, port_3389)
