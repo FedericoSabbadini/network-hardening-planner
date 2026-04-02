@@ -243,7 +243,8 @@
                 {
                     "service": "mongodb",
                     "port": 27017,
-                    "critical": true
+                    "critical": true,
+                    "vulnerable": true
                 },
                 {
                     "service": "netbios",

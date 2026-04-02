@@ -28,7 +28,8 @@
                 },
                 {
                     "service": "smb",
-                    "port": 445
+                    "port": 445,
+                    "vulnerable": true
                 },
                 {
                     "service": "ssh",

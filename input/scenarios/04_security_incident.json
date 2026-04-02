@@ -8,8 +8,11 @@
                 {
                     "service": "http",
                     "port": 80,
-                    "depends_on": [
-                        "tomcat"
+                    "depends_on_service": [
+                        {
+                            "host": "internal_app",
+                            "service": "tomcat"
+                        }
                     ]
                 },
                 {
@@ -49,8 +52,11 @@
                 {
                     "service": "tomcat",
                     "port": 8080,
-                    "depends_on": [
-                        "mysql"
+                    "depends_on_service": [
+                        {
+                            "host": "db_primary",
+                            "service": "mysql"
+                        }
                     ]
                 },
                 {
@@ -89,7 +95,8 @@
                 },
                 {
                     "service": "netbios",
-                    "port": 139
+                    "port": 139,
+                    "vulnerable": true
                 },
                 {
                     "service": "ssh",

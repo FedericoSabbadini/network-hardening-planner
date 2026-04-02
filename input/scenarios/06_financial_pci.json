@@ -1,6 +1,6 @@
 {
     "scenario_name": "06_financial_pci",
-    "description": "Compliance PCI-DSS scenario. An enterprise network with a mix of web, application, database, storage, and monitoring servers. The web servers (web1 and web2) run HTTP and HTTPS services, the application servers (app1 and app2) run Tomcat and FTP services, the database servers (db_master and db_slave) run MySQL, the storage server runs SMB and NetBIOS, and the monitoring server runs Prometheus. The policy forbids certain ports to be exposed to the internet.",
+    "description": "Compliance PCI-DSS scenario. An enterprise network with a mix of web, application, database, storage, and monitoring servers.",
     "hosts": [
         {
             "id": "web_banking",
@@ -8,8 +8,11 @@
                 {
                     "service": "http",
                     "port": 80,
-                    "depends_on": [
-                        "nodejs"
+                    "depends_on_service": [
+                        {
+                            "host": "api_gateway",
+                            "service": "nodejs"
+                        }
                     ]
                 },
                 {
@@ -32,9 +35,15 @@
                 {
                     "service": "nodejs",
                     "port": 3000,
-                    "depends_on": [
-                        "tomcat",
-                        "rabbitmq"
+                    "depends_on_service": [
+                        {
+                            "host": "core_banking",
+                            "service": "tomcat"
+                        },
+                        {
+                            "host": "mq_cluster",
+                            "service": "rabbitmq"
+                        }
                     ]
                 },
                 {
@@ -68,9 +77,15 @@
                     "service": "tomcat",
                     "port": 8080,
                     "critical": true,
-                    "depends_on": [
-                        "postgresql",
-                        "rabbitmq"
+                    "depends_on_service": [
+                        {
+                            "host": "accounts_db",
+                            "service": "postgresql"
+                        },
+                        {
+                            "host": "mq_cluster",
+                            "service": "rabbitmq"
+                        }
                     ]
                 },
                 {
@@ -163,7 +178,8 @@
                 },
                 {
                     "service": "kibana",
-                    "port": 5601
+                    "port": 5601,
+                    "vulnerable": true
                 },
                 {
                     "service": "ssh",

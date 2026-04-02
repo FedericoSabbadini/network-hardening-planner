@@ -8,8 +8,11 @@
                 {
                     "service": "http",
                     "port": 80,
-                    "depends_on": [
-                        "tomcat"
+                    "depends_on_service": [
+                        {
+                            "host": "app1",
+                            "service": "tomcat"
+                        }
                     ]
                 },
                 {
@@ -28,8 +31,11 @@
                 {
                     "service": "http",
                     "port": 80,
-                    "depends_on": [
-                        "tomcat"
+                    "depends_on_service": [
+                        {
+                            "host": "app1",
+                            "service": "tomcat"
+                        }
                     ]
                 },
                 {
@@ -48,8 +54,11 @@
                 {
                     "service": "tomcat",
                     "port": 8080,
-                    "depends_on": [
-                        "mysql"
+                    "depends_on_service": [
+                        {
+                            "host": "db_master",
+                            "service": "mysql"
+                        }
                     ]
                 },
                 {
@@ -72,8 +81,11 @@
                 {
                     "service": "tomcat",
                     "port": 8080,
-                    "depends_on": [
-                        "mysql"
+                    "depends_on_service": [
+                        {
+                            "host": "db_master",
+                            "service": "mysql"
+                        }
                     ]
                 },
                 {
@@ -136,7 +148,8 @@
             "features": [
                 {
                     "service": "prometheus",
-                    "port": 9090
+                    "port": 9090,
+                    "vulnerable": true
                 },
                 {
                     "service": "ssh",

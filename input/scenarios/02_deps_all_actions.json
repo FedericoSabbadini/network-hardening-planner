@@ -8,8 +8,11 @@
                 {
                     "service": "http",
                     "port": 80,
-                    "depends_on": [
-                        "tomcat"
+                    "depends_on_service": [
+                        {
+                            "host": "backend",
+                            "service": "tomcat"
+                        }
                     ]
                 },
                 {
@@ -28,8 +31,11 @@
                 {
                     "service": "tomcat",
                     "port": 8080,
-                    "depends_on": [
-                        "mysql"
+                    "depends_on_service": [
+                        {
+                            "host": "database",
+                            "service": "mysql"
+                        }
                     ]
                 },
                 {
@@ -65,7 +71,8 @@
                 },
                 {
                     "service": "telnet",
-                    "port": 23
+                    "port": 23,
+                    "vulnerable": true
                 }
             ]
         }

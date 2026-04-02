@@ -12,7 +12,8 @@
                 },
                 {
                     "service": "ssh",
-                    "port": 22
+                    "port": 22,
+                    "vulnerable": true
                 }
             ]
         }

@@ -8,8 +8,11 @@
                 {
                     "service": "http",
                     "port": 80,
-                    "depends_on": [
-                        "tomcat"
+                    "depends_on_service": [
+                        {
+                            "host": "ehr_app",
+                            "service": "tomcat"
+                        }
                     ]
                 },
                 {
@@ -29,8 +32,11 @@
                     "service": "tomcat",
                     "port": 8080,
                     "critical": true,
-                    "depends_on": [
-                        "postgresql"
+                    "depends_on_service": [
+                        {
+                            "host": "patient_db",
+                            "service": "postgresql"
+                        }
                     ]
                 },
                 {
@@ -115,7 +121,8 @@
                 {
                     "service": "mysql",
                     "critical": true,
-                    "port": 3306
+                    "port": 3306,
+                    "vulnerable": true
                 },
                 {
                     "service": "netbios",
