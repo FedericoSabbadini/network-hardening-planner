@@ -1,0 +1,7 @@
+Plan for: 02_deps_all_actions
+==================================================
+
+  1. block_port(mailserver, port_25, srv_smtp)
+  2. reuse_service(mailserver, srv_smtp, port_9009)
+  3. turnoff_safely(database, srv_telnet, port_23)
+  4. migrate_service(frontend, srv_http, port_80, port_8080)

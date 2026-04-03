@@ -15,24 +15,26 @@ pathOutputPlans = pathOutput + '/plans'
 
 if not os.path.exists(pathOutput):
     os.makedirs(pathOutput)
+if not os.path.exists(pathOutputPlans):
+    os.makedirs(pathOutputPlans)
 ### Utility Functions
 def get_action_type(action_name):
     name = action_name.lower()
     
-    if "block_port_firewall" in name:
-        return 'block_port_firewall'
-
-    elif "disable_service" in name:
-        return 'disable_service'
-    
-    elif "migrate_service" in name:
-        return 'migrate_service'
-    
-    elif "patch_service" in name:
+    if 'block_port' in name:
+        return 'block_port'
+    elif 'patch_service' in name:
         return 'patch_service'
-    
-    elif "reuse_service" in name:
+    elif 'migrate_service' in name:
+        return 'migrate_service'
+    elif 'disable_service' in name:
+        return 'disable_service'
+    elif 'reuse_service' in name:
         return 'reuse_service'
+    elif 'turnoff_safely' in name:
+        return 'turnoff_safely'
+    elif 'patch_with_attention' in name:
+        return 'patch_with_attention'
     return 'other'
 def run_all_scenarios():
 
@@ -70,11 +72,13 @@ def run_all_scenarios():
             'time': round(elapsed, 3),
             'actions': 0,
             'cost': 0,
-            'block_port_firewall': 0,
-            'disable_service': 0,
-            'migrate_service': 0,
+            'block_port': 0,
             'patch_service': 0,
-            'reuse_service': 0
+            'migrate_service': 0,
+            'disable_service': 0,
+            'reuse_service': 0,
+            'turnoff_safely': 0,
+            'patch_with_attention': 0
         }
 
         # --- Analyze result ---
@@ -95,9 +99,9 @@ def run_all_scenarios():
             for action in plan:
                 print(f"    {action}")
                 action_type = get_action_type(action)
-                if action_type == 'block_port_firewall':
-                    metrics['block_port_firewall'] += 1
-                    metrics['cost'] += ACTION_COSTS['block_port_firewall']
+                if action_type == 'block_port':
+                    metrics['block_port'] += 1
+                    metrics['cost'] += ACTION_COSTS['block_port']
                 elif action_type == 'disable_service':
                     metrics['disable_service'] += 1
                     metrics['cost'] += ACTION_COSTS['disable_service']
@@ -110,14 +114,22 @@ def run_all_scenarios():
                 elif action_type == 'reuse_service':
                     metrics['reuse_service'] += 1
                     metrics['cost'] += ACTION_COSTS['reuse_service']
+                elif action_type == 'turnoff_safely':
+                    metrics['turnoff_safely'] += 1
+                    metrics['cost'] += ACTION_COSTS['turnoff_safely']
+                elif action_type == 'patch_with_attention':
+                    metrics['patch_with_attention'] += 1
+                    metrics['cost'] += ACTION_COSTS['patch_with_attention']
 
             print(f"\n  Result: SOLVED in {elapsed:.3f}s")
             print(f"  Plan: {len(plan)} actions, total cost {metrics['cost']}")
             print(f"  Details: {metrics['migrate_service']} migrations, "
                   f"{metrics['disable_service']} disables, "
-                  f"{metrics['block_port_firewall']} block_port_firewall, "
+                  f"{metrics['block_port']} block_port, "
                   f"{metrics['patch_service']} patch_service, "
-                  f"{metrics['reuse_service']} reuse_service")
+                  f"{metrics['reuse_service']} reuse_service, "
+                  f"{metrics['turnoff_safely']} turnoff_safely, "
+                  f"{metrics['patch_with_attention']} patch_with_attention")
 
             # Salva il piano in un file
             with open(f"{pathOutputPlans}/plan_{name}.txt", 'w') as f:
@@ -162,9 +174,11 @@ if len(df_ok) > 0:
     print(f"\nTotal actions executed: {int(df_ok['actions'].sum())}") 
     print(f"  - Migrations: {int(df_ok['migrate_service'].sum())}")
     print(f"  - Disables: {int(df_ok['disable_service'].sum()):}")
-    print(f"  - Port Blocks: {int(df_ok['block_port_firewall'].sum()):}")
+    print(f"  - Port Blocks: {int(df_ok['block_port'].sum()):}")
     print(f"  - Patch Service: {int(df_ok['patch_service'].sum()):}")
     print(f"  - Reuse Service: {int(df_ok['reuse_service'].sum()):}")
+    print(f"  - Turnoff Safely: {int(df_ok['turnoff_safely'].sum()):}")
+    print(f"  - Patch with Attention: {int(df_ok['patch_with_attention'].sum()):}")
 
     print(f"\nTotal cost: {int(df_ok['cost'].sum()):}")
     print(f"Average time: {df_ok['time'].mean():.3f}s")
@@ -199,22 +213,40 @@ plt.show()
 
 print("Chart saved: total_cost.png")
 # --- CHART 3: Actions by type ---
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(10, 6))
+
+action_cols = [
+    'block_port',
+    'disable_service',
+    'migrate_service',
+    'patch_service',
+    'reuse_service',
+    'turnoff_safely',
+    'patch_with_attention'
+]
+labels = [
+    'Port Block',
+    'Service Disable',
+    'Service Migration',
+    'Service Patch',
+    'Service Reuse',
+    'Safe Turnoff',
+    'Patch with Attention'
+]
+colors_actions = ['#e74c3c', '#f39c12', '#2ecc71', '#3498db', "#b659aa", "#545454", "#212020"]
+
 x = np.arange(len(df_ok))
-width = 0.15
+n_types = len(action_cols)
+width = 0.8 / n_types  # fill ~80% of each scenario slot
 
-plt.bar(x - 1.5*width, df_ok['block_port_firewall'], width, label='Port Blocks', color='#e74c3c')
-plt.bar(x - 0.5*width, df_ok['disable_service'], width, label='Service Disables', color='#f39c12')
-plt.bar(x + 0.5*width, df_ok['migrate_service'], width, label='Service Migrations', color='#2ecc71')
-plt.bar(x + 1.5*width, df_ok['patch_service'], width, label='Service Patches', color='#3498db')
-plt.bar(x + 2.5*width, df_ok['reuse_service'], width, label='Service Reuse', color='#9b59b6')
+for i, (col, label, color) in enumerate(zip(action_cols, labels, colors_actions)):
+    offset = (i - (n_types - 1) / 2) * width
+    plt.bar(x + offset, df_ok[col], width, label=label, color=color)
 
-plt.xticks(x, [s for s in df_ok['scenario']], rotation=45, ha='right')
+plt.xticks(x, df_ok['scenario'], rotation=45, ha='right')
 plt.ylabel('Number of Actions')
-
-
 plt.title('Actions by Type')
-plt.legend()
+plt.legend(fontsize=8, ncol=1)
 plt.grid(axis='y', alpha=0.3)
 plt.tight_layout()
 plt.savefig(pathOutput + '/actions_by_type.png', dpi=150)

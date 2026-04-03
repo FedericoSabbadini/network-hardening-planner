@@ -1,8 +1,0 @@
-Plan for: 01_all_actions_basic
-==================================================
-
-  1. block_port_firewall(fileserver, port_139, srv_netbios)
-  2. migrate_service(legacy, srv_telnet, port_23, port_2323)
-  3. migrate_service(web1, srv_http, port_80, port_8080)
-  4. reuse_service(fileserver, srv_netbios, port_9001)
-  5. patch_service(fileserver, srv_smb)

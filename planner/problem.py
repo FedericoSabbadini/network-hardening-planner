@@ -8,7 +8,12 @@ from .conf import ALTERNATIVE_PORTS, ACTION_COSTS, SERVICE_PORTS
 
 
 class NetworkHardeningProblem:
-
+    """
+    Problem class for the network hardening problem.
+    It initializes the problem based on the given scenario, setting up the objects, initial state, and goals 
+    according to the scenario's hosts, services, ports, and policy constraints.
+    """
+    
     def __init__(self, scenario):
         self.domain = NetworkHardeningDomain()
         self.problem = self.domain.get_problem()

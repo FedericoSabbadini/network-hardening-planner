@@ -1,0 +1,17 @@
+Plan for: 06_financial_pci
+==================================================
+
+  1. block_port(tx_db, port_139, srv_netbios)
+  2. reuse_service(tx_db, srv_netbios, port_9009)
+  3. block_port(security_siem, port_23, srv_telnet)
+  4. disable_service(security_siem, srv_telnet)
+  5. turnoff_safely(security_siem, srv_kibana, port_5601)
+  6. block_port(mq_cluster, port_161, srv_snmp)
+  7. disable_service(mq_cluster, srv_snmp)
+  8. block_port(core_banking, port_69, srv_tftp)
+  9. disable_service(core_banking, srv_tftp)
+ 10. block_port(accounts_db, port_23, srv_telnet)
+ 11. disable_service(accounts_db, srv_telnet)
+ 12. migrate_service(web_banking, srv_http, port_80, port_8080)
+ 13. migrate_service(admin_console, srv_vnc, port_5900, port_59000)
+ 14. migrate_service(admin_console, srv_rdp, port_3389, port_33389)

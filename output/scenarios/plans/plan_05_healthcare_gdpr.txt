@@ -1,0 +1,16 @@
+Plan for: 05_healthcare_gdpr
+==================================================
+
+  1. patch_with_attention(audit_db, srv_mysql)
+  2. block_port(medical_files, port_139, srv_netbios)
+  3. reuse_service(medical_files, srv_netbios, port_9009)
+  4. block_port(legacy_gateway, port_23, srv_telnet)
+  5. disable_service(legacy_gateway, srv_telnet)
+  6. block_port(legacy_gateway, port_25, srv_smtp)
+  7. reuse_service(legacy_gateway, srv_smtp, port_9009)
+  8. block_port(audit_db, port_139, srv_netbios)
+  9. reuse_service(audit_db, srv_netbios, port_9009)
+ 10. turnoff_safely(admin_ws, srv_rdp, port_3389)
+ 11. block_port(admin_ws, port_161, srv_snmp)
+ 12. reuse_service(admin_ws, srv_snmp, port_9009)
+ 13. migrate_service(patient_portal, srv_http, port_80, port_8080)

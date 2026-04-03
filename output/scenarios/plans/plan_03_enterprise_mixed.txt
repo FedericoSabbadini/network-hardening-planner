@@ -1,0 +1,19 @@
+Plan for: 03_enterprise_mixed
+==================================================
+
+  1. patch_with_attention(db_master, srv_mysql)
+  2. block_port(storage, port_139, srv_netbios)
+  3. patch_service(storage, srv_netbios, port_139)
+  4. block_port(monitoring, port_23, srv_telnet)
+  5. disable_service(monitoring, srv_telnet)
+  6. turnoff_safely(monitoring, srv_prometheus, port_9090)
+  7. block_port(app2, port_21, srv_ftp)
+  8. disable_service(app2, srv_ftp)
+  9. block_port(app1, port_21, srv_ftp)
+ 10. disable_service(app1, srv_ftp)
+ 11. block_port(app1, port_161, srv_snmp)
+ 12. reuse_service(app1, srv_snmp, port_9009)
+ 13. block_port(storage, port_139, srv_netbios)
+ 14. reuse_service(storage, srv_netbios, port_9009)
+ 15. migrate_service(web2, srv_http, port_80, port_8080)
+ 16. migrate_service(web1, srv_http, port_80, port_8080)
