@@ -81,31 +81,30 @@ class NetworkHardeningDomain:
     def set_actions(self):
         """
         Sets the actions for the network hardening problem:
-        - patch_service(host, service): patches service on host, mitigating its vulnerabilities without causing downtime, but it can be done only if the service is not forbidden by company policy and if it is not vulnerable to zero-day exploits for which there are no patches available yet (in this case there would be no way to mitigate the service vulnerabilities until patches become available, so the only option would be disabling it until then)
-        - disable_service(host, service): disables service on host, causing downtime on it but mitigating its vulnerabilities without affecting other services (i.e., without causing downtime on other services, as long as there are no dependencies between the disabled service and other active services, in this case it would not be possible to disable the service without causing downtime on the dependent services, so the only option would be patching it if possible, or blocking its ports if it is not possible to patch it and if it is not critical, or migrating it to another port if it is not possible to patch it and if blocking its ports would cause unacceptable downtime on it or on other services)
-        - block_port_firewall(host, port, service): blocks port on host with a firewall, causing downtime on the service using it but allowing to mitigate its vulnerabilities without disabling it (i.e., without causing downtime on the service, as long as there are no dependencies between the service using the port and other active services, in this case it would not be possible to block the port without causing downtime on the dependent services, so the only option would be patching the service if possible, or disabling it if it is critical or if there is no possibility to patch it without causing unacceptable risk of service issues), or migrating it to another port if there is no possibility to patch it without causing unacceptable risk of service issues and if it is not critical or if there is no possibility to disable it without causing unacceptable risk of service issues)
-        - migrate_service(host, service, port_old, port_new): migrates service on host from port_old to port_new, causing downtime on it but allowing to mitigate its vulnerabilities without disabling it (i.e., without causing downtime on the service, as long as there are no dependencies between the service and other active services, in this case it would not be possible to migrate the service without causing downtime on the dependent services, so the only option would be patching the service if possible, or disabling it if it is critical or if there is no possibility to patch it without causing unacceptable risk of service issues), or blocking its old port with a firewall if there is no possibility to patch it without causing unacceptable risk of service issues and if it is not critical or if there is no possibility to disable it without causing unacceptable risk of service issues)
-        - reuse_service(host, service, port): reuses service on host by opening port and letting service use it, restoring its functionality after it has been mitigated by blocking its ports or migrating it to other ports, but it can be done only if there is an alternative port that can be used by the service (i.e., if there is a port that is not forbidden and that can be opened without affecting other services), so it is not always possible to reuse a service after mitigating it
+        - disable_service(host, service): disables service on host, making it inactive and not vulnerable (it is not possible to disable a service that is already inactive, or that is reachable from outside the network, or that is vulnerable, because in the first case the service would already be mitigated, in the second case disabling the service would cause unacceptable operational impact, and in the third case it would be risky to disable a vulnerable service without first mitigating the risk of service issues by blocking the port or migrating the service to another port)
+        - block_port_firewall(host, port, service): blocks port on host using a firewall, making the service that depends on it unreachable from outside the network (it is not possible to block a port that is not open, or that is used by a critical service, or that is used by a service that is not reachable from outside the network, because in the first case the port would already be blocked, in the second case blocking the port would cause unacceptable operational impact, and in the third case it would not be necessary to block the port because the service is not reachable from outside the network and therefore it does not need mitigation)
+        - migrate_service(host, service, port_old, port_new): migrates service on host from port_old to port_new, making it reachable from outside the network through port_new and not reachable from outside the network through port_old (it is not possible to migrate a service that cannot be migrated from port_old to port_new, or that is not active, or that is using a closed port, or that is using a forbidden port, or that is using a forbidden service, or that is not reachable from outside the network, or that is critical, because in the first case the migration would not be possible, in the second case the service would already be mitigated, in the third case it would not be possible to migrate the service because it is using a closed port, in the fourth case it would not be possible to migrate the service because it is using a forbidden port, in the fifth case it would not be possible to migrate the service because it is using a forbidden service, in the sixth case it would not be necessary to migrate the service because it is not reachable from outside the network and therefore it does not need mitigation, and in the seventh case migrating the service would cause unacceptable operational impact)
+        - patch_service(host, service, port): patches service on host, making it not vulnerable (it is not possible to patch a service that is using an open port, or that is not active, or that is reachable from outside the network, or that is not vulnerable, or that is using a forbidden service, because in the first case it would be risky to apply a patch that may cause unexpected service issues (e.g., incompatibility, bugs, etc.) without first mitigating the risk of service issues by blocking the port or migrating the service to another port, in the second case the service would already be mitigated, in the third case it would be risky to apply a patch that may cause unexpected service issues (e.g., incompatibility, bugs, etc.) without first mitigating the risk of service issues by blocking the port or migrating the service to another port, in the fourth case the service would already be mitigated, and in the fifth case it would not be possible to patch the service because it is using a forbidden service)
+        - reuse_service(host, service, port): reuses port on host for service, making service reachable from outside the network through port (it is not possible to reuse a port for a service if the service is not active, or if it is using an open port, or if it is reachable from outside the network, or if it is using a forbidden service, or if it is using a forbidden port, or if it is critical, or if it is vulnerable, because in the first case the service would already be mitigated, in the second case it would not be possible to reuse the port because it is already open, in the third case it would not be possible to reuse the port because the service is already reachable from outside the network and therefore it does not need mitigation, in the fourth case it would not be possible to reuse the port because it is using a forbidden service, in the fifth case it would not be possible to reuse the port because it is using a forbidden port, in the sixth case reusing the port would cause unacceptable operational impact, and in the seventh case it would be risky to reuse the port without first mitigating the risk of service issues by blocking the port or migrating the service to another port)
+         - patch_with_attention(host, service): similar to patch_service, but for critical services, which may require more careful testing and validation before applying the patch, and may have a higher risk of causing unexpected service issues (e.g., incompatibility, bugs, etc.) (it is not possible to patch a critical service that is not active, or that is not vulnerable, or that is using a forbidden service, because in the first case the service would already be mitigated, in the second case the service would already be mitigated, and in the third case it would not be possible to patch the service because it is using a forbidden service)
+         - turnoff_safely(host, service, port): similar to disable_service, but for vulnerable services, which may require more careful mitigation to avoid service issues (e.g., incompatibility, bugs, etc.) (it is not possible to turn off a vulnerable service safely if the port it is using cannot be blocked or if there are services that depend on it and would become unreachable from outside the network without it, because in the first case it would be risky to disable the service without first mitigating the risk of service issues by blocking the port, and in the second case it would be risky to disable the service without first mitigating the risk of service issues by blocking the port or migrating the dependent services to other ports) 
         """
         patch_service = self.set_patch_service()
         disable_service = self.set_disable_service()
-        block_port_firewall = self.set_block_port_firewall()
         migrate_service = self.set_migrate_service()
         reuse_service = self.set_reuse_service()
-        reuse_vulnerable_service = self.set_reuse_vulnerable_service()
-        disable_vulnerable_service = self.set_disable_vulnerable_service()
-        patch_critical_service = self.set_patch_critical_service()
-
+        block_port = self.set_block_port()
+        patch_with_attention = self.set_patch_with_attention()
+        turnoff_safely = self.set_turnoff_safely()
 
         self.actions = {
             'patch_service': patch_service,
             'disable_service': disable_service,
-            'block_port_firewall': block_port_firewall,
             'migrate_service': migrate_service,
             'reuse_service': reuse_service,
-            'reuse_vulnerable_service': reuse_vulnerable_service,
-            'disable_vulnerable_service': disable_vulnerable_service,
-            'patch_critical_service': patch_critical_service,
+            'block_port': block_port,
+            'patch_with_attention': patch_with_attention,
+            'turnoff_safely': turnoff_safely
         }
 
         for action in self.actions.values():
@@ -127,37 +126,22 @@ class NetworkHardeningDomain:
         return disable_service_action
     
 
-    def set_disable_vulnerable_service(self): 
+    def set_turnoff_safely(self): 
         # ========= INTERFACE =========
-        disable_vulnerable_service_action = InstantaneousAction('disable_vulnerable_service', host=self.types['Host'], service=self.types['Service'])
+        turnoff_safely_action = InstantaneousAction('turnoff_safely', host=self.types['Host'], service=self.types['Service'], port=self.types['Port'])
         # ========= PARAMETERS =========
-        h = disable_vulnerable_service_action.parameter('host')
-        s = disable_vulnerable_service_action.parameter('service')
+        h = turnoff_safely_action.parameter('host')
+        s = turnoff_safely_action.parameter('service')
+        p = turnoff_safely_action.parameter('port')
         # ========= PRECONDITIONS =========
-        disable_vulnerable_service_action.add_precondition(self.fluents['service_active'](h, s))
-        disable_vulnerable_service_action.add_precondition(Not(self.fluents['service_reachable'](h, s)))
-        # ========= EFFECTS =========
-        disable_vulnerable_service_action.add_effect(self.fluents['service_active'](h, s), False)
-        disable_vulnerable_service_action.add_effect(self.fluents['service_vulnerable'](h, s), False)
-        return disable_vulnerable_service_action
-
-
-    def set_block_port_firewall(self): 
-        # ========= INTERFACE =========
-        block_port_firewall_action = InstantaneousAction('block_port_firewall', host=self.types['Host'], port=self.types['Port'], service=self.types['Service'])
-        # ========= PARAMETERS =========
-        h = block_port_firewall_action.parameter('host')
-        p = block_port_firewall_action.parameter('port')
-        s = block_port_firewall_action.parameter('service')
-        # ========= PRECONDITIONS =========
-        block_port_firewall_action.add_precondition(self.fluents['open_port'](h, p))
-        block_port_firewall_action.add_precondition(self.fluents['service_uses_port'](h, s, p)) 
-        block_port_firewall_action.add_precondition(Not(self.fluents['service_critical'](h, s))) 
-        block_port_firewall_action.add_precondition(self.fluents['service_reachable'](h, s))
-        block_port_firewall_action.add_precondition(self.fluents['service_active'](h, s))
+        turnoff_safely_action.add_precondition(self.fluents['open_port'](h, p))
+        turnoff_safely_action.add_precondition(self.fluents['service_uses_port'](h, s, p)) 
+        turnoff_safely_action.add_precondition(Not(self.fluents['service_critical'](h, s))) 
+        turnoff_safely_action.add_precondition(self.fluents['service_reachable'](h, s))
+        turnoff_safely_action.add_precondition(self.fluents['service_active'](h, s))
         h2 = Variable('h2', self.types['Host'])
         s2 = Variable('s2', self.types['Service'])
-        block_port_firewall_action.add_precondition(
+        turnoff_safely_action.add_precondition(
             Forall(
                 Implies(self.fluents['depends_on'](h2, s2, h, s), 
                     Not(self.fluents['service_reachable'](h2, s2))),
@@ -165,10 +149,41 @@ class NetworkHardeningDomain:
             )
         )
         # ========= EFFECTS =========
-        block_port_firewall_action.add_effect(self.fluents['open_port'](h, p), False)
-        block_port_firewall_action.add_effect(self.fluents['service_uses_port'](h, s, p), False)
-        block_port_firewall_action.add_effect(self.fluents['service_reachable'](h, s), False)
-        return block_port_firewall_action
+        turnoff_safely_action.add_effect(self.fluents['open_port'](h, p), False)
+        turnoff_safely_action.add_effect(self.fluents['service_uses_port'](h, s, p), False)
+        turnoff_safely_action.add_effect(self.fluents['service_reachable'](h, s), False)
+        turnoff_safely_action.add_effect(self.fluents['service_active'](h, s), False)
+        turnoff_safely_action.add_effect(self.fluents['service_vulnerable'](h, s), False)
+        return turnoff_safely_action
+    
+    
+    def set_block_port(self): 
+        # ========= INTERFACE =========
+        block_port_action = InstantaneousAction('block_port', host=self.types['Host'], port=self.types['Port'], service=self.types['Service'])
+        # ========= PARAMETERS =========
+        h = block_port_action.parameter('host')
+        p = block_port_action.parameter('port')
+        s = block_port_action.parameter('service')
+        # ========= PRECONDITIONS =========
+        block_port_action.add_precondition(self.fluents['open_port'](h, p))
+        block_port_action.add_precondition(self.fluents['service_uses_port'](h, s, p)) 
+        block_port_action.add_precondition(Not(self.fluents['service_critical'](h, s))) 
+        block_port_action.add_precondition(self.fluents['service_reachable'](h, s))
+        block_port_action.add_precondition(self.fluents['service_active'](h, s))
+        h2 = Variable('h2', self.types['Host'])
+        s2 = Variable('s2', self.types['Service'])
+        block_port_action.add_precondition(
+            Forall(
+                Implies(self.fluents['depends_on'](h2, s2, h, s), 
+                    Not(self.fluents['service_reachable'](h2, s2))),
+                h2, s2
+            )
+        )
+        # ========= EFFECTS =========
+        block_port_action.add_effect(self.fluents['open_port'](h, p), False)
+        block_port_action.add_effect(self.fluents['service_uses_port'](h, s, p), False)
+        block_port_action.add_effect(self.fluents['service_reachable'](h, s), False)
+        return block_port_action
         
     
     def set_migrate_service(self): 
@@ -201,32 +216,38 @@ class NetworkHardeningDomain:
     
     def set_patch_service(self):
         # ========= INTERFACE =========
-        patch_service_action = InstantaneousAction('patch_service', host=self.types['Host'], service=self.types['Service'])
+        patch_service_action = InstantaneousAction('patch_service', host=self.types['Host'], service=self.types['Service'], port=self.types['Port'])
         # ========= PARAMETERS =========
         h = patch_service_action.parameter('host')
         s = patch_service_action.parameter('service')
+        p = patch_service_action.parameter('port')
         # ========= PRECONDITIONS =========
+        patch_service_action.add_precondition(Not(self.fluents['open_port'](h, p)))  # patching can be done only if the service is not using an open port, because if the service is using an open port it would be reachable from outside the network and therefore it would be risky to apply a patch that may cause unexpected service issues (e.g., incompatibility, bugs, etc.) without first mitigating the risk of service issues by blocking the port or migrating the service to another port
         patch_service_action.add_precondition(self.fluents['service_active'](h, s))
+        patch_service_action.add_precondition(Not(self.fluents['service_reachable'](h, s)))
         patch_service_action.add_precondition(self.fluents['service_vulnerable'](h, s))
         patch_service_action.add_precondition(Not(self.fluents['service_forbidden'](s)))
         # ========= EFFECTS =========
         patch_service_action.add_effect(self.fluents['service_vulnerable'](h, s), False)
+        patch_service_action.add_effect(self.fluents['open_port'](h, p), True)
+        patch_service_action.add_effect(self.fluents['service_uses_port'](h, s, p), True)
+        patch_service_action.add_effect(self.fluents['service_reachable'](h, s), True)
         return patch_service_action
     
-    def set_patch_critical_service(self):
+    def set_patch_with_attention(self):
         # ========= INTERFACE =========
-        patch_critical_service_action = InstantaneousAction('patch_critical_service', host=self.types['Host'], service=self.types['Service'])
+        patch_with_attention_action = InstantaneousAction('patch_with_attention', host=self.types['Host'], service=self.types['Service'])
         # ========= PARAMETERS =========
-        h = patch_critical_service_action.parameter('host')
-        s = patch_critical_service_action.parameter('service')
+        h = patch_with_attention_action.parameter('host')
+        s = patch_with_attention_action.parameter('service')
         # ========= PRECONDITIONS =========
-        patch_critical_service_action.add_precondition(self.fluents['service_active'](h, s))
-        patch_critical_service_action.add_precondition(self.fluents['service_vulnerable'](h, s))
-        patch_critical_service_action.add_precondition(Not(self.fluents['service_forbidden'](s)))
-        patch_critical_service_action.add_precondition(self.fluents['service_critical'](h, s))
+        patch_with_attention_action.add_precondition(self.fluents['service_active'](h, s))
+        patch_with_attention_action.add_precondition(self.fluents['service_vulnerable'](h, s))
+        patch_with_attention_action.add_precondition(Not(self.fluents['service_forbidden'](s)))
+        patch_with_attention_action.add_precondition(self.fluents['service_critical'](h, s))
         # ========= EFFECTS =========
-        patch_critical_service_action.add_effect(self.fluents['service_vulnerable'](h, s), False)
-        return patch_critical_service_action
+        patch_with_attention_action.add_effect(self.fluents['service_vulnerable'](h, s), False)
+        return patch_with_attention_action
 
     def set_reuse_service(self): 
         # ========= INTERFACE =========
@@ -250,29 +271,6 @@ class NetworkHardeningDomain:
         reuse_service_action.add_effect(self.fluents['open_possibility'](h, p), False)
         reuse_service_action.add_effect(self.fluents['service_reachable'](h, s), True)
         return reuse_service_action
-
-    def set_reuse_vulnerable_service(self): 
-        # ========= INTERFACE =========
-        reuse_vulnerable_service_action = InstantaneousAction('reuse_vulnerable_service', host=self.types['Host'], service=self.types['Service'], port=self.types['Port'])
-        # ========= PARAMETERS =========
-        h = reuse_vulnerable_service_action.parameter('host')
-        s = reuse_vulnerable_service_action.parameter('service')
-        p = reuse_vulnerable_service_action.parameter('port')
-        # ========= PRECONDITIONS =========
-        reuse_vulnerable_service_action.add_precondition(self.fluents['service_active'](h, s))
-        reuse_vulnerable_service_action.add_precondition(self.fluents['open_possibility'](h, p))
-        reuse_vulnerable_service_action.add_precondition(Not(self.fluents['service_forbidden'](s)))
-        reuse_vulnerable_service_action.add_precondition(Not(self.fluents['open_port'](h, p)))
-        reuse_vulnerable_service_action.add_precondition(Not(self.fluents['service_reachable'](h, s)))
-        reuse_vulnerable_service_action.add_precondition(Not(self.fluents['port_forbidden'](p)))
-        reuse_vulnerable_service_action.add_precondition(Not(self.fluents['service_critical'](h, s)))
-        # ========= EFFECTS =========
-        reuse_vulnerable_service_action.add_effect(self.fluents['service_uses_port'](h, s, p), True)
-        reuse_vulnerable_service_action.add_effect(self.fluents['open_port'](h, p), True)
-        reuse_vulnerable_service_action.add_effect(self.fluents['open_possibility'](h, p), False)
-        reuse_vulnerable_service_action.add_effect(self.fluents['service_reachable'](h, s), True)
-        reuse_vulnerable_service_action.add_effect(self.fluents['service_vulnerable'](h, s), False)
-        return reuse_vulnerable_service_action
     
 
     def get_problem(self): return self.problem

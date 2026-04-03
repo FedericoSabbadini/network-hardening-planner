@@ -104,7 +104,8 @@
                 {
                     "service": "mysql",
                     "port": 3306,
-                    "critical": true
+                    "critical": true,
+                    "vulnerable": true
                 },
                 {
                     "service": "ssh",
@@ -135,7 +136,8 @@
                 },
                 {
                     "service": "netbios",
-                    "port": 139
+                    "port": 139,
+                    "vulnerable": true
                 },
                 {
                     "service": "ssh",
