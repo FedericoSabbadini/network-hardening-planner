@@ -188,13 +188,14 @@ class NetworkHardeningProblem:
                     self.problem.add_goal(
                         fluents['service_reachable'](host_obj, service_obj)
                     )
+                    
 
         # ACTION COSTS
         cost_map = {}
         for action in self.problem.actions:
             name = action.name.lower()
-            if 'block_port_firewall' in name:
-                cost_map[action] = Int(ACTION_COSTS['block_port_firewall'])
+            if 'block_port' in name:
+                cost_map[action] = Int(ACTION_COSTS['block_port'])
             elif 'disable_service' in name:
                 cost_map[action] = Int(ACTION_COSTS['disable_service'])
             elif 'migrate_service' in name:
@@ -203,12 +204,10 @@ class NetworkHardeningProblem:
                 cost_map[action] = Int(ACTION_COSTS['patch_service'])
             elif 'reuse_service' in name:
                 cost_map[action] = Int(ACTION_COSTS['reuse_service'])
-            elif 'reuse_vulnerable_service' in name:
-                cost_map[action] = Int(ACTION_COSTS['reuse_vulnerable_service'])
-            elif 'disable_vulnerable_service' in name:
-                cost_map[action] = Int(ACTION_COSTS['disable_vulnerable_service'])
-            elif 'patch_critical_service' in name:
-                cost_map[action] = Int(ACTION_COSTS['patch_critical_service'])
+            elif 'turnoff_safely' in name:
+                cost_map[action] = Int(ACTION_COSTS['turnoff_safely'])
+            elif 'patch_with_attention' in name:
+                cost_map[action] = Int(ACTION_COSTS['patch_with_attention'])
 
         if cost_map:
             self.problem.add_quality_metric(MinimizeActionCosts(cost_map, default=Int(1)))
