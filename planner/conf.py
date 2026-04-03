@@ -1,11 +1,14 @@
 # === MITIGATION ACTION COSTS ===
 # Criteria: operational impact (downtime) + risk during the operation
 ACTION_COSTS = {
-    'block_port_firewall': 10,  # makes the service that depends on it unavailable from outside
-    'patch_service':        4,  # may require downtime to apply the patch, and there is a risk the patch may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
-    'migrate_service':      8,   # may require downtime to migrate the service to a new port, and there is a risk the migration may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
-    'disable_service':    5 ,  # makes the service completely unavailable, with lower operational impact than blocking the port, but with lower risk during operation (it is simpler to disable a service than to migrate or patch it)
-    'reuse_service':       20,   # may require downtime to open the port and let the service use it, and there is a risk opening the port may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
+    'block_port_firewall': 5,  # makes the service that depends on it unavailable from outside
+    'patch_service':        7,  # may require downtime to apply the patch, and there is a risk the patch may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
+    'migrate_service':      16,   # may require downtime to migrate the service to a new port, and there is a risk the migration may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
+    'disable_service':    10 ,  # makes the service completely unavailable, with lower operational impact than blocking the port, but with lower risk during operation (it is simpler to disable a service than to migrate or patch it)
+    'reuse_service':       14,   # may require downtime to open the port and let the service use it, and there is a risk opening the port may cause unexpected service issues (e.g., incompatibility, bugs, etc.)
+    'reuse_vulnerable_service': 16,  # similar to reuse_service, but for vulnerable services
+    'disable_vulnerable_service': 12,  # similar to disable_service, but for vulnerable services
+    'patch_critical_service': 10,  # similar to patch_service, but for critical services, which may require more careful testing and validation before applying the patch, and may have a higher risk of causing unexpected service issues (e.g., incompatibility, bugs, etc.)
 }
 
 # === ALTERNATIVE PORTS ===

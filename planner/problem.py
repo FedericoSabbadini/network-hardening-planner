@@ -1,5 +1,8 @@
-from unified_planning.shortcuts import Not, MinimizeActionCosts, Object, Compiler, OneshotPlanner, Int
-from unified_planning.engines import CompilationKind
+from unified_planning.shortcuts import (
+    Not, MinimizeActionCosts, Object, Compiler, OneshotPlanner,
+    Int, Exists, And, Variable
+)
+from unified_planning.engines import CompilationKind, OptimalityGuarantee
 from .domain import NetworkHardeningDomain
 from .conf import ALTERNATIVE_PORTS, ACTION_COSTS, SERVICE_PORTS
 
@@ -15,7 +18,6 @@ class NetworkHardeningProblem:
         self.forbiddenP = scenario['policy'].get('forbidden_ports', [])
         self.forbiddenS = scenario['policy'].get('forbidden_services', [])
         self.serv_ports = SERVICE_PORTS.copy()
-
 
         self.host_service_ports = {}
         self.host_open_ports = {}
@@ -70,95 +72,89 @@ class NetworkHardeningProblem:
     def setup_initial_state(self):
         fluents = self.domain.get_fluents()
 
+
+        for port in self.forbiddenP:
+            port_obj = self.objects.get(f'port_{port}')
+            if port_obj:
+                self.problem.set_initial_value(fluents['port_forbidden'](port_obj), True)
+        
+        for service in self.forbiddenS:
+            service_obj = self.objects.get(f'srv_{service}')
+            if service_obj:
+                self.problem.set_initial_value(fluents['service_forbidden'](service_obj), True)
+
+        hosts_needing_open_possibility = {
+            h['id']
+            for h in self.scenario['hosts']
+            for feat in h.get('features', [])
+            if (feat.get('port') in self.forbiddenP
+                and feat['service'] not in self.forbiddenS
+                and (ALTERNATIVE_PORTS.get(feat.get('port')) is None
+                    or ALTERNATIVE_PORTS.get(feat.get('port')) in self.forbiddenP))
+        }
+
         for host in self.scenario['hosts']:
             host_id = host['id']
             host_obj = self.objects[host_id]
-            service_to_port = self.host_service_ports[host_id]
-            open_ports = self.host_open_ports[host_id]
 
             # OPEN_PORT
-            for port in open_ports:
+            for port in self.host_open_ports[host_id]:
                 self.problem.set_initial_value(
                     fluents['open_port'](host_obj, self.objects[f'port_{port}']), True
                 )
 
-            # SERVICE_ACTIVE, SERVICE_USES_PORT, MIGRATE_POSSIBILITY
-            for service, port in service_to_port.items():
-                service_obj = self.objects[f'srv_{service}']
-                self.problem.set_initial_value(fluents['service_active'](host_obj, service_obj), True)
+            # Singolo pass sulle features
+            for feature in host.get('features', []):
+                service_name = feature['service']
+                port = feature.get('port')
+                service_obj = self.objects.get(f'srv_{service_name}')
+                if service_obj is None:
+                    continue
 
+                # SERVICE_ACTIVE + SERVICE_USES_PORT + MIGRATE_POSSIBILITY
+                self.problem.set_initial_value(fluents['service_active'](host_obj, service_obj), True)
                 if port is not None:
                     port_obj = self.objects[f'port_{port}']
                     self.problem.set_initial_value(
                         fluents['service_uses_port'](host_obj, service_obj, port_obj), True
                     )
-                    if port in ALTERNATIVE_PORTS:
-                        alt_port = ALTERNATIVE_PORTS[port]
+                    self.problem.set_initial_value(
+                        fluents['service_reachable'](host_obj, service_obj), True
+                    )
+                    alt_port = ALTERNATIVE_PORTS.get(port)
+                    if alt_port is not None:
                         alt_port_obj = self.objects.get(f'port_{alt_port}')
-                        if alt_port_obj is not None:
+                        if alt_port_obj:
                             self.problem.set_initial_value(
                                 fluents['migrate_possibility'](host_obj, service_obj, port_obj, alt_port_obj), True
                             )
 
+                # CRITICAL + VULNERABLE
+                if feature.get('critical'):
+                    self.problem.set_initial_value(fluents['service_critical'](host_obj, service_obj), True)
+                if feature.get('vulnerable'):
+                    self.problem.set_initial_value(fluents['service_vulnerable'](host_obj, service_obj), True)
 
-
-            # SERVICE_CRITICAL, SERVICE_VULNERABLE, DEPENDS_ON
-            for feature in host.get('features', []):
-                service_name = feature['service']
-                service_obj = self.objects.get(f'srv_{service_name}')
-                if service_obj is None:
-                    continue
-
-                if feature.get('critical', False):
-                    self.problem.set_initial_value(
-                        fluents['service_critical'](host_obj, service_obj), True
-                    )
-
-                if feature.get('vulnerable', False):
-                    self.problem.set_initial_value(
-                        fluents['service_vulnerable'](host_obj, service_obj), True
-                    )
-
-                # FIX 3: nuovo formato depends_on_service: [{host: "hostY", service: "srvY"}]
+                # DEPENDS_ON
                 for dep in feature.get('depends_on_service', []):
-                    base_host_id = dep['host']
-                    base_service_name = dep['service']
-                    base_host_obj = self.objects.get(base_host_id)
-                    base_service_obj = self.objects.get(f'srv_{base_service_name}')
-                    if base_host_obj is None or base_service_obj is None:
+                    base_host_obj = self.objects.get(dep['host'])
+                    base_service_obj = self.objects.get(f'srv_{dep["service"]}')
+                    if base_host_obj and base_service_obj:
+                        self.problem.set_initial_value(
+                            fluents['depends_on'](host_obj, service_obj, base_host_obj, base_service_obj), True
+                        )
+
+
+            # OPEN_POSSIBILITY: solo per host che ne hanno bisogno
+            if host_id in hosts_needing_open_possibility:
+                for srv_port in SERVICE_PORTS:
+                    if srv_port in self.forbiddenP:
                         continue
-                    self.problem.set_initial_value(
-                        fluents['depends_on'](host_obj, service_obj, base_host_obj, base_service_obj), True
-                    )
-
-            # SERVICE_FORBIDDEN E PORT_FORBIDDEN
-            for feature in host.get('features', []):
-                service_name = feature['service']
-                port = feature.get('port')
-
-                if service_name in self.forbiddenS:
-                    service_obj = self.objects.get(f'srv_{service_name}')
-                    if service_obj is not None:
+                    port_obj = self.objects.get(f'port_{srv_port}')
+                    if port_obj:
                         self.problem.set_initial_value(
-                            fluents['service_forbidden'](service_obj), True
+                            fluents['open_possibility'](host_obj, port_obj), True
                         )
-
-                if port in self.forbiddenP:
-                    port_obj = self.objects.get(f'port_{port}')
-                    if port_obj is not None:
-                        self.problem.set_initial_value(
-                            fluents['port_forbidden'](port_obj), True
-                        )
-
-        for port in SERVICE_PORTS:
-            if port in self.forbiddenP:
-                continue
-            port_obj = self.objects.get(f'port_{port}')
-            if port_obj is not None:
-                self.problem.set_initial_value(
-                    fluents['open_possibility'](port_obj), True
-                )
-
 
     def setup_goal(self):
         fluents = self.domain.get_fluents()
@@ -172,7 +168,7 @@ class NetworkHardeningProblem:
                 port = feature.get('port')
                 service_obj = self.objects.get(f'srv_{service_name}')
 
-                # GOAL 1: Fix vulnerable services
+                # GOAL 1: Fix vulnerable services (only if service is not forbidden — patch is applicable)
                 if feature.get('vulnerable', False) and service_obj is not None and service_name not in self.forbiddenS:
                     self.problem.add_goal(Not(fluents['service_vulnerable'](host_obj, service_obj)))
 
@@ -186,15 +182,12 @@ class NetworkHardeningProblem:
                 if service_name in self.forbiddenS and service_obj is not None:
                     self.problem.add_goal(Not(fluents['service_active'](host_obj, service_obj)))
 
-                # GOAL 4: service_uses_port deve essere True per tutti i servizi non forbidden che sono su porte forbidden con alternativa, se l'alternativa è non forbidden
-                if port in self.forbiddenP and service_name not in self.forbiddenS and service_obj is not None:
-                    alt_port = ALTERNATIVE_PORTS.get(port)
-                    alt_port_obj = self.objects.get(f'port_{alt_port}')
-                    serv_port = self.serv_ports.pop(0) if self.serv_ports else None
-                    if alt_port_obj is not None and alt_port not in self.forbiddenP:
-                        self.problem.add_goal( fluents['service_uses_port'](host_obj, service_obj, alt_port_obj) )
-                    elif serv_port is not None:
-                        self.problem.add_goal( fluents['service_uses_port'](host_obj, service_obj, self.objects[f'port_{serv_port}']) )
+                # GOAL 4: Services on a forbidden port but NOT forbidden must remain
+                # reachable on some non-forbidden open port.
+                if port in self.forbiddenP and service_name not in self.forbiddenS:
+                    self.problem.add_goal(
+                        fluents['service_reachable'](host_obj, service_obj)
+                    )
 
         # ACTION COSTS
         cost_map = {}
@@ -209,11 +202,20 @@ class NetworkHardeningProblem:
             elif 'patch_service' in name:
                 cost_map[action] = Int(ACTION_COSTS['patch_service'])
             elif 'reuse_service' in name:
-                cost_map[action] = Int(ACTION_COSTS['reuse_service']) # se reuse_service non è definita nei costi, assegna un costo di default (es. 1)
+                cost_map[action] = Int(ACTION_COSTS['reuse_service'])
+            elif 'reuse_vulnerable_service' in name:
+                cost_map[action] = Int(ACTION_COSTS['reuse_vulnerable_service'])
+            elif 'disable_vulnerable_service' in name:
+                cost_map[action] = Int(ACTION_COSTS['disable_vulnerable_service'])
+            elif 'patch_critical_service' in name:
+                cost_map[action] = Int(ACTION_COSTS['patch_critical_service'])
 
         if cost_map:
             self.problem.add_quality_metric(MinimizeActionCosts(cost_map, default=Int(1)))
-    
+
+    # ------------------------------------------------------------------
+    # SOLVE  — three-stage compilation + optimal Fast Downward
+    # ------------------------------------------------------------------
     def solve(self):
         try:
             with Compiler(
@@ -222,7 +224,7 @@ class NetworkHardeningProblem:
             ) as compiler:
                 compiled = compiler.compile(self.problem)
 
-                with OneshotPlanner(name='fast-downward'
+                with OneshotPlanner(name='fast-downward', optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY
                 ) as planner:
                     result = planner.solve(compiled.problem)
 
@@ -242,12 +244,14 @@ class NetworkHardeningProblem:
 # UTILITIES
 # =========================
 
-def get_port_host_mapping(host):
+def get_port_host_mapping(host, default_port=9999):
     service_to_port = {}
     open_ports = set()
     for feature in host['features']:
         service = feature['service']
         port = feature['port']
+        if port is None:
+            port = default_port
         open_ports.add(port)
         service_to_port[service] = port
     return service_to_port, open_ports
