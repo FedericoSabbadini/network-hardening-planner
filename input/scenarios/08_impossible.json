@@ -7,13 +7,13 @@
             "features": [
                 {
                     "service": "mysql",
-                    "port": 3306,
-                    "critical": true
+                    "critical": true,
+                    "port": 3306
                 },
                 {
                     "service": "ssh",
-                    "port": 22,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 22
                 }
             ]
         }

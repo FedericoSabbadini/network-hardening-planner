@@ -7,13 +7,13 @@
             "features": [
                 {
                     "service": "http",
-                    "port": 80,
                     "depends_on_service": [
                         {
                             "host": "ehr_app",
                             "service": "tomcat"
                         }
-                    ]
+                    ],
+                    "port": 80
                 },
                 {
                     "service": "https",
@@ -30,19 +30,19 @@
             "features": [
                 {
                     "service": "tomcat",
-                    "port": 8080,
                     "critical": true,
                     "depends_on_service": [
                         {
                             "host": "patient_db",
                             "service": "postgresql"
                         }
-                    ]
+                    ],
+                    "port": 8080
                 },
                 {
                     "service": "https",
-                    "port": 443,
-                    "critical": true
+                    "critical": true,
+                    "port": 443
                 },
                 {
                     "service": "ssh",
@@ -103,8 +103,8 @@
             "features": [
                 {
                     "service": "rdp",
-                    "port": 3389,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 3389
                 },
                 {
                     "service": "snmp",
@@ -122,8 +122,8 @@
                 {
                     "service": "mysql",
                     "critical": true,
-                    "port": 3306,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 3306
                 },
                 {
                     "service": "netbios",

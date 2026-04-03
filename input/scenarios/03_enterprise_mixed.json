@@ -7,13 +7,13 @@
             "features": [
                 {
                     "service": "http",
-                    "port": 80,
                     "depends_on_service": [
                         {
                             "host": "app1",
                             "service": "tomcat"
                         }
-                    ]
+                    ],
+                    "port": 80
                 },
                 {
                     "service": "https",
@@ -30,13 +30,13 @@
             "features": [
                 {
                     "service": "http",
-                    "port": 80,
                     "depends_on_service": [
                         {
                             "host": "app1",
                             "service": "tomcat"
                         }
-                    ]
+                    ],
+                    "port": 80
                 },
                 {
                     "service": "https",
@@ -53,13 +53,13 @@
             "features": [
                 {
                     "service": "tomcat",
-                    "port": 8080,
                     "depends_on_service": [
                         {
                             "host": "db_master",
                             "service": "mysql"
                         }
-                    ]
+                    ],
+                    "port": 8080
                 },
                 {
                     "service": "ftp",
@@ -80,13 +80,13 @@
             "features": [
                 {
                     "service": "tomcat",
-                    "port": 8080,
                     "depends_on_service": [
                         {
                             "host": "db_master",
                             "service": "mysql"
                         }
-                    ]
+                    ],
+                    "port": 8080
                 },
                 {
                     "service": "ftp",
@@ -103,9 +103,9 @@
             "features": [
                 {
                     "service": "mysql",
-                    "port": 3306,
                     "critical": true,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 3306
                 },
                 {
                     "service": "ssh",
@@ -118,8 +118,8 @@
             "features": [
                 {
                     "service": "mysql",
-                    "port": 3306,
-                    "critical": true
+                    "critical": true,
+                    "port": 3306
                 },
                 {
                     "service": "ssh",
@@ -136,8 +136,8 @@
                 },
                 {
                     "service": "netbios",
-                    "port": 139,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 139
                 },
                 {
                     "service": "ssh",
@@ -150,8 +150,8 @@
             "features": [
                 {
                     "service": "prometheus",
-                    "port": 9090,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 9090
                 },
                 {
                     "service": "ssh",

@@ -7,13 +7,13 @@
             "features": [
                 {
                     "service": "http",
-                    "port": 80,
                     "depends_on_service": [
                         {
                             "host": "api_gateway",
                             "service": "nodejs"
                         }
-                    ]
+                    ],
+                    "port": 80
                 },
                 {
                     "service": "https",
@@ -34,7 +34,6 @@
                 },
                 {
                     "service": "nodejs",
-                    "port": 3000,
                     "depends_on_service": [
                         {
                             "host": "core_banking",
@@ -44,7 +43,8 @@
                             "host": "mq_cluster",
                             "service": "rabbitmq"
                         }
-                    ]
+                    ],
+                    "port": 3000
                 },
                 {
                     "service": "ssh",
@@ -57,8 +57,8 @@
             "features": [
                 {
                     "service": "tomcat",
-                    "port": 8080,
-                    "critical": true
+                    "critical": true,
+                    "port": 8080
                 },
                 {
                     "service": "tftp",
@@ -75,7 +75,6 @@
             "features": [
                 {
                     "service": "tomcat",
-                    "port": 8080,
                     "critical": true,
                     "depends_on_service": [
                         {
@@ -86,12 +85,13 @@
                             "host": "mq_cluster",
                             "service": "rabbitmq"
                         }
-                    ]
+                    ],
+                    "port": 8080
                 },
                 {
                     "service": "https",
-                    "port": 443,
-                    "critical": true
+                    "critical": true,
+                    "port": 443
                 },
                 {
                     "service": "ssh",
@@ -121,8 +121,8 @@
             "features": [
                 {
                     "service": "postgresql",
-                    "port": 5432,
-                    "critical": true
+                    "critical": true,
+                    "port": 5432
                 },
                 {
                     "service": "telnet",
@@ -139,8 +139,8 @@
             "features": [
                 {
                     "service": "postgresql",
-                    "port": 5432,
-                    "critical": true
+                    "critical": true,
+                    "port": 5432
                 },
                 {
                     "service": "netbios",
@@ -178,8 +178,8 @@
                 },
                 {
                     "service": "kibana",
-                    "port": 5601,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 5601
                 },
                 {
                     "service": "ssh",

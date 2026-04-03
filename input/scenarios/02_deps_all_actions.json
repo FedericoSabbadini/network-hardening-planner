@@ -7,13 +7,13 @@
             "features": [
                 {
                     "service": "http",
-                    "port": 80,
                     "depends_on_service": [
                         {
                             "host": "backend",
                             "service": "tomcat"
                         }
-                    ]
+                    ],
+                    "port": 80
                 },
                 {
                     "service": "https",
@@ -30,13 +30,13 @@
             "features": [
                 {
                     "service": "tomcat",
-                    "port": 8080,
                     "depends_on_service": [
                         {
                             "host": "database",
                             "service": "mysql"
                         }
-                    ]
+                    ],
+                    "port": 8080
                 },
                 {
                     "service": "ssh",
@@ -62,8 +62,8 @@
             "features": [
                 {
                     "service": "mysql",
-                    "port": 3306,
-                    "critical": true
+                    "critical": true,
+                    "port": 3306
                 },
                 {
                     "service": "ssh",
@@ -71,8 +71,8 @@
                 },
                 {
                     "service": "telnet",
-                    "port": 23,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 23
                 }
             ]
         }

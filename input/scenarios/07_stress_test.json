@@ -206,8 +206,8 @@
             "features": [
                 {
                     "service": "mysql",
-                    "port": 3306,
-                    "critical": true
+                    "critical": true,
+                    "port": 3306
                 },
                 {
                     "service": "telnet",
@@ -224,8 +224,8 @@
             "features": [
                 {
                     "service": "postgresql",
-                    "port": 5432,
-                    "critical": true
+                    "critical": true,
+                    "port": 5432
                 },
                 {
                     "service": "telnet",
@@ -242,9 +242,9 @@
             "features": [
                 {
                     "service": "mongodb",
-                    "port": 27017,
                     "critical": true,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 27017
                 },
                 {
                     "service": "netbios",

@@ -7,13 +7,13 @@
             "features": [
                 {
                     "service": "http",
-                    "port": 80,
                     "depends_on_service": [
                         {
                             "host": "internal_app",
                             "service": "tomcat"
                         }
-                    ]
+                    ],
+                    "port": 80
                 },
                 {
                     "service": "https",
@@ -51,13 +51,13 @@
             "features": [
                 {
                     "service": "tomcat",
-                    "port": 8080,
                     "depends_on_service": [
                         {
                             "host": "db_primary",
                             "service": "mysql"
                         }
-                    ]
+                    ],
+                    "port": 8080
                 },
                 {
                     "service": "rdp",
@@ -95,8 +95,8 @@
                 },
                 {
                     "service": "netbios",
-                    "port": 139,
-                    "vulnerable": true
+                    "vulnerable": true,
+                    "port": 139
                 },
                 {
                     "service": "ssh",
