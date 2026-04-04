@@ -1,8 +1,11 @@
 Plan for: 01_all_actions_basic
 ==================================================
 
-  1. turnoff_safely(fileserver, srv_smb, port_445)
-  2. block_port(fileserver, port_139, srv_netbios)
-  3. reuse_service(fileserver, srv_netbios, port_9009)
-  4. migrate_service(web1, srv_http, port_80, port_8080)
-  5. migrate_service(legacy, srv_telnet, port_23, port_2323)
+  1. block_port(legacy, port_23, srv_telnet)
+  2. open_new_port(legacy, port_9000, srv_telnet)
+  3. block_port(fileserver, port_139, srv_netbios)
+  4. open_new_port(fileserver, port_9000, srv_netbios)
+  5. block_for_maintenance(fileserver, port_445, srv_smb)
+  6. patch_service(fileserver, srv_smb)
+  7. restore_service(fileserver, port_445, srv_smb)
+  8. migrate_service(web1, srv_http, port_80, port_80808)
