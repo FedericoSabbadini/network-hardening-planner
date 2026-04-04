@@ -9,8 +9,9 @@ from planner.conf import ACTION_COSTS
 from planner.problem import NetworkHardeningProblem
 import numpy as np
 pathInput = 'input'
-pathInputScenarios = pathInput + '/scenarios'
-pathOutput = 'output'
+path = input('Enter the name of the scenario folder: ')
+pathInputScenarios = pathInput + '/' + path
+pathOutput = 'output' + '/' + path
 pathOutputPlans = pathOutput + '/plans'
 
 if not os.path.exists(pathOutput):
@@ -29,12 +30,12 @@ def get_action_type(action_name):
         return 'migrate_service'
     elif 'disable_service' in name:
         return 'disable_service'
-    elif 'reuse_service' in name:
-        return 'reuse_service'
-    elif 'turnoff_safely' in name:
-        return 'turnoff_safely'
-    elif 'patch_with_attention' in name:
-        return 'patch_with_attention'
+    elif 'block_for_maintenance' in name:
+        return 'block_for_maintenance'
+    elif 'open_new_port' in name:
+        return 'open_new_port'
+    elif 'restore_service' in name:
+        return 'restore_service'
     return 'other'
 def run_all_scenarios():
 
@@ -59,7 +60,6 @@ def run_all_scenarios():
               f"Actions: {len(problem.problem.actions)}, "
               f"Goals: {len(problem.problem.goals)}\n")
 
-
         # --- Solve ---
         start = time.time()
         result, _ = problem.solve()
@@ -76,9 +76,9 @@ def run_all_scenarios():
             'patch_service': 0,
             'migrate_service': 0,
             'disable_service': 0,
-            'reuse_service': 0,
-            'turnoff_safely': 0,
-            'patch_with_attention': 0
+            'restore_service': 0,
+            'open_new_port': 0,
+            'block_for_maintenance': 0,
         }
 
         # --- Analyze result ---
@@ -111,15 +111,16 @@ def run_all_scenarios():
                 elif action_type == 'patch_service':
                     metrics['patch_service'] += 1
                     metrics['cost'] += ACTION_COSTS['patch_service']
-                elif action_type == 'reuse_service':
-                    metrics['reuse_service'] += 1
-                    metrics['cost'] += ACTION_COSTS['reuse_service']
-                elif action_type == 'turnoff_safely':
-                    metrics['turnoff_safely'] += 1
-                    metrics['cost'] += ACTION_COSTS['turnoff_safely']
-                elif action_type == 'patch_with_attention':
-                    metrics['patch_with_attention'] += 1
-                    metrics['cost'] += ACTION_COSTS['patch_with_attention']
+                elif action_type == 'block_for_maintenance':
+                    metrics['block_for_maintenance'] += 1
+                    metrics['cost'] += ACTION_COSTS['block_for_maintenance']
+                elif action_type == 'open_new_port':
+                    metrics['open_new_port'] += 1
+                    metrics['cost'] += ACTION_COSTS['open_new_port']
+                elif action_type == 'restore_service':
+                    metrics['restore_service'] += 1
+                    metrics['cost'] += ACTION_COSTS['restore_service']
+
 
             print(f"\n  Result: SOLVED in {elapsed:.3f}s")
             print(f"  Plan: {len(plan)} actions, total cost {metrics['cost']}")
@@ -127,9 +128,9 @@ def run_all_scenarios():
                   f"{metrics['disable_service']} disables, "
                   f"{metrics['block_port']} block_port, "
                   f"{metrics['patch_service']} patch_service, "
-                  f"{metrics['reuse_service']} reuse_service, "
-                  f"{metrics['turnoff_safely']} turnoff_safely, "
-                  f"{metrics['patch_with_attention']} patch_with_attention")
+                  f"{metrics['block_for_maintenance']} block_for_maintenance, "
+                  f"{metrics['open_new_port']} open_new_port, "
+                  f"{metrics['restore_service']} restore_service")
 
             # Salva il piano in un file
             with open(f"{pathOutputPlans}/plan_{name}.txt", 'w') as f:
@@ -157,6 +158,7 @@ df_results.to_csv(pathOutput + '/summary.csv', index=False)
 print("\nResults saved in '" + pathOutput + "/summary.csv'")
 # --- Calculate statistics ---
 print("\nSTATISTICS")
+
 print("-" * 40)
 
 # Count scenarios by status
@@ -172,13 +174,13 @@ print(f"Unsolved: {n_fail}")
 if len(df_ok) > 0:
 
     print(f"\nTotal actions executed: {int(df_ok['actions'].sum())}") 
-    print(f"  - Migrations: {int(df_ok['migrate_service'].sum())}")
-    print(f"  - Disables: {int(df_ok['disable_service'].sum()):}")
-    print(f"  - Port Blocks: {int(df_ok['block_port'].sum()):}")
+    print(f"  - Migrate Service: {int(df_ok['migrate_service'].sum())}")
+    print(f"  - Disable Service: {int(df_ok['disable_service'].sum()):}")
+    print(f"  - Block Port: {int(df_ok['block_port'].sum()):}")
     print(f"  - Patch Service: {int(df_ok['patch_service'].sum()):}")
-    print(f"  - Reuse Service: {int(df_ok['reuse_service'].sum()):}")
-    print(f"  - Turnoff Safely: {int(df_ok['turnoff_safely'].sum()):}")
-    print(f"  - Patch with Attention: {int(df_ok['patch_with_attention'].sum()):}")
+    print(f"  - Block for Maintenance: {int(df_ok['block_for_maintenance'].sum()):}")
+    print(f"  - Open New Port: {int(df_ok['open_new_port'].sum()):}")
+    print(f"  - Restore Service: {int(df_ok['restore_service'].sum()):}")
 
     print(f"\nTotal cost: {int(df_ok['cost'].sum()):}")
     print(f"Average time: {df_ok['time'].mean():.3f}s")
@@ -220,18 +222,18 @@ action_cols = [
     'disable_service',
     'migrate_service',
     'patch_service',
-    'reuse_service',
-    'turnoff_safely',
-    'patch_with_attention'
+    'block_for_maintenance',
+    'open_new_port',
+    'restore_service'
 ]
 labels = [
-    'Port Block',
+    'Block Port',
     'Service Disable',
-    'Service Migration',
+    'Open New Port',
+    'Block for Maintenance',
     'Service Patch',
-    'Service Reuse',
-    'Safe Turnoff',
-    'Patch with Attention'
+    'Service Restore',
+    'Service Migration'
 ]
 colors_actions = ['#e74c3c', '#f39c12', '#2ecc71', '#3498db', "#b659aa", "#545454", "#212020"]
 
@@ -243,7 +245,7 @@ for i, (col, label, color) in enumerate(zip(action_cols, labels, colors_actions)
     offset = (i - (n_types - 1) / 2) * width
     plt.bar(x + offset, df_ok[col], width, label=label, color=color)
 
-plt.xticks(x, df_ok['scenario'], rotation=45, ha='right')
+plt.xticks(x, df_ok['scenario'], rotation=10, ha='right')
 plt.ylabel('Number of Actions')
 plt.title('Actions by Type')
 plt.legend(fontsize=8, ncol=1)
