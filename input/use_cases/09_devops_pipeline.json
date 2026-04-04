@@ -1,0 +1,797 @@
+{
+  "scenario_name": "09_devops_pipeline",
+  "description": "Large-scale CI/CD pipeline infrastructure with 40 hosts: Jenkins cluster (master + 5 agents), dual source control (git_server + replica + code_review), build system (master + 2 workers), Nexus artifact management (primary + replica + cache), SonarQube analysis (server + scanner), Harbor container registry (core + worker + proxy), Kubernetes cluster (3 masters + 2 workers + ingress), monitoring stack (prometheus + grafana + alertmanager + elasticsearch + kibana), databases (sonar_db + artifact_db + metrics_db), security (vault + scanner + siem) and build infra (cache + deploy + config). Exercises all 7 hardening actions across a deep, wide dependency graph.",
+  "hosts": [
+    {
+      "id": "jenkins_master",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "nexus_repo",
+              "service": "http"
+            },
+            {
+              "host": "sonarqube",
+              "service": "http"
+            },
+            {
+              "host": "git_server",
+              "service": "http"
+            },
+            {
+              "host": "harbor_core",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "https",
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "vulnerable": true,
+          "port": 22
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        }
+      ]
+    },
+    {
+      "id": "jenkins_agent1",
+      "features": [
+        {
+          "service": "ftp",
+          "vulnerable": true,
+          "port": 21
+        },
+        {
+          "service": "netbios",
+          "port": 139,
+          "vulnerable": true
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "jenkins_agent2",
+      "features": [
+        {
+          "service": "ftp",
+          "port": 21
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "vulnerable": true,
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "jenkins_agent3",
+      "features": [
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "jenkins_agent4",
+      "features": [
+        {
+          "service": "ftp",
+          "vulnerable": true,
+          "port": 21
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "jenkins_agent5",
+      "features": [
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "netbios",
+          "vulnerable": true,
+          "port": 139
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "git_server",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "vulnerable": true,
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "git_replica",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "code_review",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "git_server",
+              "service": "http"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "vulnerable": true,
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "build_master",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "nexus_repo",
+              "service": "http"
+            },
+            {
+              "host": "git_server",
+              "service": "http"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "build_worker1",
+      "features": [
+        {
+          "service": "ftp",
+          "vulnerable": true,
+          "port": 21
+        },
+        {
+          "service": "telnet",
+          "vulnerable": true,
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "build_worker2",
+      "features": [
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "netbios",
+          "port": 139,
+          "vulnerable": true
+        },
+        {
+          "service": "ssh",
+          "vulnerable": true,
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "nexus_repo",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "smb",
+          "vulnerable": true,
+          "port": 445
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "nexus_replica",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "artifact_cache",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "ftp",
+          "port": 21
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "sonarqube",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "sonar_db",
+              "service": "postgresql"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "sonar_scanner",
+      "features": [
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "harbor_core",
+      "features": [
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "harbor_worker",
+      "features": [
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "registry_proxy",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "harbor_core",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "k8s_master1",
+      "features": [
+        {
+          "service": "https",
+          "critical": true,
+          "depends_on_service": [
+            {
+              "host": "harbor_core",
+              "service": "https"
+            },
+            {
+              "host": "secrets_vault",
+              "service": "https"
+            }
+          ],
+          "port": 443
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "k8s_master2",
+      "features": [
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "k8s_master3",
+      "features": [
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "k8s_worker1",
+      "features": [
+        {
+          "service": "netbios",
+          "port": 139,
+          "vulnerable": true
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "k8s_worker2",
+      "features": [
+        {
+          "service": "ftp",
+          "port": 21
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "k8s_ingress",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "k8s_master1",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "prometheus",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "prometheus_metrics",
+          "vulnerable": true,
+          "port": 9090
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "grafana",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "prometheus",
+              "service": "http"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "alertmanager",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "prometheus",
+              "service": "http"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "elasticsearch_log",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "elasticsearch",
+          "vulnerable": true,
+          "port": 9200
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "kibana_log",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "elasticsearch_log",
+              "service": "http"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "kibana",
+          "vulnerable": true,
+          "port": 5601
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "sonar_db",
+      "features": [
+        {
+          "service": "postgresql",
+          "critical": true,
+          "vulnerable": true,
+          "port": 5432
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "artifact_db",
+      "features": [
+        {
+          "service": "mysql",
+          "critical": true,
+          "port": 3306
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "metrics_db",
+      "features": [
+        {
+          "service": "postgresql",
+          "critical": true,
+          "vulnerable": true,
+          "port": 5432
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "secrets_vault",
+      "features": [
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "vulnerability_scanner",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "ftp",
+          "vulnerable": true,
+          "port": 21
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "siem",
+      "features": [
+        {
+          "service": "elasticsearch",
+          "vulnerable": true,
+          "port": 9200
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "build_cache",
+      "features": [
+        {
+          "service": "redis",
+          "vulnerable": true,
+          "port": 6379
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "deploy_server",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "k8s_master1",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "config_server",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "secrets_vault",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "netbios",
+          "port": 139,
+          "vulnerable": true
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    }
+  ],
+  "policy": {
+    "forbidden_ports": [
+      80,
+      21,
+      23,
+      139,
+      161,
+      3389
+    ],
+    "forbidden_services": [
+      "ftp",
+      "telnet",
+      "snmp",
+      "rdp"
+    ]
+  }
+}

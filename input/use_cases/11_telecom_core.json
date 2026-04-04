@@ -1,0 +1,858 @@
+{
+  "scenario_name": "11_telecom_core",
+  "description": "Large-scale telecom core network with 40 hosts: AAA cluster (radius x3 + ldap master+slave), DNS cluster (2 primaries + 2 secondaries + resolver), VoIP cluster (sip_proxy x2 + media_gateway x2 + voip_pbx), Network Management (nms + ems + performance_mgmt + config_mgmt), Billing cluster (master + slave + mediation + rating_engine + cdr_server), OSS/BSS (service_fulfillment + trouble_ticketing + inventory_mgmt), Infrastructure (ntp x2 + syslog x2 + firewall_mgmt + monitoring x2 + backup x2), Core network (bgp_router x2 + mpls_controller + customer_portal). Exercises all 7 hardening actions: 3 turnoff_safely cases (ftp vulnerable on radius_secondary/mediation/backup), 3 reuse_service cases (netbios on ldap_slave/dns_secondary1/cdr_server), 2 patch_with_attention cases (https/billing_master and postgresql/syslog1), 2 patch_service cases (smb/ntp_server1 and kibana/monitoring1), and broad migrate_service/disable_service coverage.",
+  "hosts": [
+    {
+      "id": "radius_primary",
+      "features": [
+        {
+          "service": "radius",
+          "vulnerable": true,
+          "port": 1812,
+          "critical": true
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "snmp",
+          "vulnerable": true,
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "radius_secondary",
+      "features": [
+        {
+          "service": "radius",
+          "port": 1812
+        },
+        {
+          "service": "ftp",
+          "vulnerable": true,
+          "port": 21
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "radius_tertiary",
+      "features": [
+        {
+          "service": "radius",
+          "port": 1812
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "ldap_master",
+      "features": [
+        {
+          "service": "ldap",
+          "port": 389
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ftp",
+          "port": 21
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "ldap_slave",
+      "features": [
+        {
+          "service": "ldap",
+          "vulnerable": true,
+          "port": 389
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "netbios",
+          "port": 139,
+          "vulnerable": true
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "dns_primary1",
+      "features": [
+        {
+          "service": "dns",
+          "port": 53
+        },
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "dns_primary2",
+      "features": [
+        {
+          "service": "dns",
+          "port": 53
+        },
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "dns_secondary1",
+      "features": [
+        {
+          "service": "dns",
+          "port": 53
+        },
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "netbios",
+          "port": 139,
+          "vulnerable": true
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "dns_secondary2",
+      "features": [
+        {
+          "service": "dns",
+          "port": 53
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "dns_resolver",
+      "features": [
+        {
+          "service": "dns",
+          "port": 53
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "vulnerable": true,
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "sip_proxy1",
+      "features": [
+        {
+          "service": "sip",
+          "port": 5060
+        },
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "sip_proxy2",
+      "features": [
+        {
+          "service": "sip",
+          "port": 5060
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "media_gateway1",
+      "features": [
+        {
+          "service": "rtp",
+          "port": 8000
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "media_gateway2",
+      "features": [
+        {
+          "service": "rtp",
+          "vulnerable": true,
+          "port": 8000
+        },
+        {
+          "service": "ftp",
+          "port": 21
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "voip_pbx",
+      "features": [
+        {
+          "service": "sip",
+          "depends_on_service": [
+            {
+              "host": "sip_proxy1",
+              "service": "sip"
+            },
+            {
+              "host": "sip_proxy2",
+              "service": "sip"
+            }
+          ],
+          "port": 5060
+        },
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "vnc",
+          "port": 5900
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "nms",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "ems",
+              "service": "http"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "ems",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "performance_mgmt",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "nms",
+              "service": "http"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "prometheus_metrics",
+          "vulnerable": true,
+          "port": 9090
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "config_mgmt",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "ldap_master",
+              "service": "ldap"
+            },
+            {
+              "host": "radius_primary",
+              "service": "radius"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "billing_master",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "vulnerable": true,
+          "port": 443
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "billing_slave",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "mediation",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "ftp",
+          "vulnerable": true,
+          "port": 21
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "rating_engine",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "billing_master",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "cdr_server",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "netbios",
+          "port": 139,
+          "vulnerable": true
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "service_fulfillment",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "ldap_master",
+              "service": "ldap"
+            },
+            {
+              "host": "billing_master",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "trouble_ticketing",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "billing_master",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "inventory_mgmt",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "ldap_master",
+              "service": "ldap"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "ntp_server1",
+      "features": [
+        {
+          "service": "ntp",
+          "port": 123
+        },
+        {
+          "service": "smb",
+          "vulnerable": true,
+          "port": 445
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "ntp_server2",
+      "features": [
+        {
+          "service": "ntp",
+          "port": 123
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "syslog1",
+      "features": [
+        {
+          "service": "syslog",
+          "port": 514
+        },
+        {
+          "service": "postgresql",
+          "critical": true,
+          "vulnerable": true,
+          "port": 5432
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "syslog2",
+      "features": [
+        {
+          "service": "syslog",
+          "port": 514
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "firewall_mgmt",
+      "features": [
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "vnc",
+          "port": 5900
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "monitoring1",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "kibana",
+          "vulnerable": true,
+          "port": 5601
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "monitoring2",
+      "features": [
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "elasticsearch",
+          "port": 9200
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "backup_primary",
+      "features": [
+        {
+          "service": "ftp",
+          "vulnerable": true,
+          "port": 21
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "backup_secondary",
+      "features": [
+        {
+          "service": "ftp",
+          "port": 21
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "bgp_router1",
+      "features": [
+        {
+          "service": "bgp",
+          "port": 179
+        },
+        {
+          "service": "http",
+          "port": 80
+        },
+        {
+          "service": "snmp",
+          "port": 161
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "bgp_router2",
+      "features": [
+        {
+          "service": "bgp",
+          "vulnerable": true,
+          "port": 179
+        },
+        {
+          "service": "telnet",
+          "port": 23
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "mpls_controller",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "bgp_router1",
+              "service": "bgp"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "rdp",
+          "port": 3389
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    },
+    {
+      "id": "customer_portal",
+      "features": [
+        {
+          "service": "http",
+          "depends_on_service": [
+            {
+              "host": "ldap_master",
+              "service": "ldap"
+            },
+            {
+              "host": "billing_master",
+              "service": "https"
+            }
+          ],
+          "port": 80
+        },
+        {
+          "service": "https",
+          "critical": true,
+          "port": 443
+        },
+        {
+          "service": "ssh",
+          "port": 22
+        }
+      ]
+    }
+  ],
+  "policy": {
+    "forbidden_ports": [
+      80,
+      21,
+      23,
+      139,
+      161,
+      3389,
+      5900
+    ],
+    "forbidden_services": [
+      "ftp",
+      "telnet",
+      "snmp",
+      "rdp",
+      "vnc"
+    ]
+  }
+}

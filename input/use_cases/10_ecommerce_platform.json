@@ -1,0 +1,901 @@
+{
+    "scenario_name": "10_ecommerce_platform",
+    "description": "Large-scale e-commerce platform with 40 hosts and a 5-level dependency chain: web tier (web_cdn + 3 web frontends + 2 load balancers), API tier (2 gateways + auth x2 + catalog x2 + order x2 + payment + notification + search + recommendation + review + image), data tier (user_db master+slave, catalog_db master+slave, orders_db, payment_db x2, search_index, session_cache x2, analytics_db), infrastructure (message_queue x2 + cdn_origin + admin_console + backup + monitoring + log_aggregator + kibana_dashboard + reporting). Exercises all 7 hardening actions with 3 reuse_service cases, 2 turnoff_safely cases, 3 patch_with_attention cases, 3 patch_service cases and a broad mix of migrate_service and disable_service.",
+    "hosts": [
+        {
+            "id": "web_cdn",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "lb_frontend1",
+                            "service": "http"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "https",
+                    "vulnerable": true,
+                    "port": 443
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "lb_frontend1",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "api_gw1",
+                            "service": "nodejs"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "https",
+                    "critical": true,
+                    "port": 443
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "lb_frontend2",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "api_gw2",
+                            "service": "nodejs"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "https",
+                    "critical": true,
+                    "port": 443
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "api_gw1",
+            "features": [
+                {
+                    "service": "nodejs",
+                    "vulnerable": true,
+                    "depends_on_service": [
+                        {
+                            "host": "auth_svc1",
+                            "service": "https"
+                        },
+                        {
+                            "host": "catalog_svc1",
+                            "service": "http"
+                        },
+                        {
+                            "host": "order_svc1",
+                            "service": "http"
+                        }
+                    ],
+                    "port": 3000,
+                    "critical": true
+                },
+                {
+                    "service": "https",
+                    "port": 443
+                },
+                {
+                    "service": "snmp",
+                    "vulnerable": true,
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "api_gw2",
+            "features": [
+                {
+                    "service": "nodejs",
+                    "depends_on_service": [
+                        {
+                            "host": "auth_svc2",
+                            "service": "https"
+                        },
+                        {
+                            "host": "catalog_svc2",
+                            "service": "http"
+                        },
+                        {
+                            "host": "order_svc2",
+                            "service": "http"
+                        }
+                    ],
+                    "port": 3000
+                },
+                {
+                    "service": "https",
+                    "port": 443
+                },
+                {
+                    "service": "rdp",
+                    "port": 3389
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "auth_svc1",
+            "features": [
+                {
+                    "service": "https",
+                    "critical": true,
+                    "vulnerable": true,
+                    "depends_on_service": [
+                        {
+                            "host": "user_db_master",
+                            "service": "postgresql"
+                        }
+                    ],
+                    "port": 443
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "auth_svc2",
+            "features": [
+                {
+                    "service": "https",
+                    "critical": true,
+                    "depends_on_service": [
+                        {
+                            "host": "user_db_master",
+                            "service": "postgresql"
+                        }
+                    ],
+                    "port": 443
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "catalog_svc1",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "catalog_db_master",
+                            "service": "mysql"
+                        }
+                    ],
+                    "port": 8080
+                },
+                {
+                    "service": "ftp",
+                    "vulnerable": true,
+                    "port": 21
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "catalog_svc2",
+            "features": [
+                {
+                    "service": "http",
+                    "vulnerable": true,
+                    "depends_on_service": [
+                        {
+                            "host": "catalog_db_slave",
+                            "service": "mysql"
+                        }
+                    ],
+                    "port": 8080,
+                    "critical": true
+                },
+                {
+                    "service": "telnet",
+                    "port": 23
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "order_svc1",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "orders_db",
+                            "service": "postgresql"
+                        },
+                        {
+                            "host": "payment_svc",
+                            "service": "https"
+                        }
+                    ],
+                    "port": 8080
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "order_svc2",
+            "features": [
+                {
+                    "service": "http",
+                    "vulnerable": true,
+                    "depends_on_service": [
+                        {
+                            "host": "orders_db",
+                            "service": "postgresql"
+                        },
+                        {
+                            "host": "payment_svc",
+                            "service": "https"
+                        }
+                    ],
+                    "port": 8080,
+                    "critical": true
+                },
+                {
+                    "service": "telnet",
+                    "port": 23
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "payment_svc",
+            "features": [
+                {
+                    "service": "https",
+                    "critical": true,
+                    "depends_on_service": [
+                        {
+                            "host": "payment_db1",
+                            "service": "postgresql"
+                        }
+                    ],
+                    "port": 443
+                },
+                {
+                    "service": "rdp",
+                    "port": 3389
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "notification_svc",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "user_db_master",
+                            "service": "postgresql"
+                        }
+                    ],
+                    "port": 8080
+                },
+                {
+                    "service": "ftp",
+                    "port": 21
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "search_svc",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "search_index",
+                            "service": "elasticsearch"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "recommendation_svc",
+            "features": [
+                {
+                    "service": "http",
+                    "vulnerable": true,
+                    "depends_on_service": [
+                        {
+                            "host": "user_db_master",
+                            "service": "postgresql"
+                        },
+                        {
+                            "host": "catalog_db_master",
+                            "service": "mysql"
+                        }
+                    ],
+                    "port": 8080
+                },
+                {
+                    "service": "netbios",
+                    "port": 139,
+                    "vulnerable": true
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "review_svc",
+            "features": [
+                {
+                    "service": "http",
+                    "port": 8080
+                },
+                {
+                    "service": "vnc",
+                    "port": 5900
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "image_server",
+            "features": [
+                {
+                    "service": "http",
+                    "port": 80
+                },
+                {
+                    "service": "ftp",
+                    "vulnerable": true,
+                    "port": 21
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "user_db_master",
+            "features": [
+                {
+                    "service": "postgresql",
+                    "critical": true,
+                    "port": 5432
+                },
+                {
+                    "service": "netbios",
+                    "port": 139,
+                    "vulnerable": true
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "user_db_slave",
+            "features": [
+                {
+                    "service": "postgresql",
+                    "critical": true,
+                    "port": 5432
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "catalog_db_master",
+            "features": [
+                {
+                    "service": "mysql",
+                    "critical": true,
+                    "port": 3306
+                },
+                {
+                    "service": "telnet",
+                    "port": 23
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "catalog_db_slave",
+            "features": [
+                {
+                    "service": "mysql",
+                    "critical": true,
+                    "port": 3306
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "orders_db",
+            "features": [
+                {
+                    "service": "postgresql",
+                    "critical": true,
+                    "port": 5432
+                },
+                {
+                    "service": "vnc",
+                    "port": 5900
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "payment_db1",
+            "features": [
+                {
+                    "service": "postgresql",
+                    "critical": true,
+                    "vulnerable": true,
+                    "port": 5432
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "payment_db2",
+            "features": [
+                {
+                    "service": "postgresql",
+                    "critical": true,
+                    "port": 5432
+                },
+                {
+                    "service": "rdp",
+                    "port": 3389
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "search_index",
+            "features": [
+                {
+                    "service": "elasticsearch",
+                    "port": 9200
+                },
+                {
+                    "service": "http",
+                    "port": 80
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "session_cache1",
+            "features": [
+                {
+                    "service": "redis",
+                    "vulnerable": true,
+                    "port": 6379
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "session_cache2",
+            "features": [
+                {
+                    "service": "redis",
+                    "port": 6379
+                },
+                {
+                    "service": "ftp",
+                    "port": 21
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "analytics_db",
+            "features": [
+                {
+                    "service": "postgresql",
+                    "critical": true,
+                    "vulnerable": true,
+                    "port": 5432
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "message_queue1",
+            "features": [
+                {
+                    "service": "rabbitmq",
+                    "depends_on_service": [
+                        {
+                            "host": "orders_db",
+                            "service": "postgresql"
+                        }
+                    ],
+                    "port": 5672
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "message_queue2",
+            "features": [
+                {
+                    "service": "rabbitmq",
+                    "port": 5672
+                },
+                {
+                    "service": "telnet",
+                    "port": 23
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "cdn_origin",
+            "features": [
+                {
+                    "service": "http",
+                    "port": 80
+                },
+                {
+                    "service": "https",
+                    "critical": true,
+                    "port": 443
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "admin_console",
+            "features": [
+                {
+                    "service": "https",
+                    "port": 443
+                },
+                {
+                    "service": "rdp",
+                    "port": 3389
+                },
+                {
+                    "service": "vnc",
+                    "port": 5900
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "backup_server",
+            "features": [
+                {
+                    "service": "smb",
+                    "port": 445
+                },
+                {
+                    "service": "ftp",
+                    "port": 21
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "monitoring",
+            "features": [
+                {
+                    "service": "http",
+                    "port": 80
+                },
+                {
+                    "service": "prometheus_metrics",
+                    "vulnerable": true,
+                    "port": 9090
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "log_aggregator",
+            "features": [
+                {
+                    "service": "http",
+                    "port": 80
+                },
+                {
+                    "service": "elasticsearch",
+                    "port": 9200
+                },
+                {
+                    "service": "netbios",
+                    "port": 139,
+                    "vulnerable": true
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "kibana_dashboard",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "log_aggregator",
+                            "service": "http"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "kibana",
+                    "vulnerable": true,
+                    "port": 5601
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "reporting_server",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "analytics_db",
+                            "service": "postgresql"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "snmp",
+                    "port": 161
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "web_frontend1",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "api_gw1",
+                            "service": "nodejs"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "https",
+                    "port": 443
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "web_frontend2",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "api_gw2",
+                            "service": "nodejs"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "https",
+                    "port": 443
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        },
+        {
+            "id": "web_frontend3",
+            "features": [
+                {
+                    "service": "http",
+                    "depends_on_service": [
+                        {
+                            "host": "api_gw1",
+                            "service": "nodejs"
+                        },
+                        {
+                            "host": "api_gw2",
+                            "service": "nodejs"
+                        }
+                    ],
+                    "port": 80
+                },
+                {
+                    "service": "https",
+                    "port": 443
+                },
+                {
+                    "service": "ssh",
+                    "port": 22
+                }
+            ]
+        }
+    ],
+    "policy": {
+        "forbidden_ports": [
+            80,
+            21,
+            23,
+            139,
+            161,
+            3389,
+            5900,
+            445
+        ],
+        "forbidden_services": [
+            "ftp",
+            "telnet",
+            "snmp",
+            "rdp",
+            "vnc"
+        ]
+    }
+}

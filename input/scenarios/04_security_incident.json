@@ -78,6 +78,7 @@
                 },
                 {
                     "service": "tftp",
+                    "vulnerable": true,
                     "port": 69
                 },
                 {
