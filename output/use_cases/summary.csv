@@ -1,4 +1,4 @@
 scenario,status,time,actions,cost,block_port,patch_service,migrate_service,disable_service,restore_service,open_new_port,block_for_maintenance
-09_devops_pipeline,SUCCESS,48.298,132,995,35,18,18,29,13,6,13
-10_ecommerce_platform,SUCCESS,62.025,108,805,29,14,14,25,11,4,11
-11_telecom_core,SUCCESS,91.84,133,1059,40,13,20,35,10,5,10
+09_devops_pipeline,SUCCESS,83.142,132,995,35,18,18,29,13,6,13
+10_ecommerce_platform,SUCCESS,102.154,108,805,29,14,14,25,11,4,11
+11_telecom_core,SUCCESS,156.732,133,1059,40,13,20,35,10,5,10
