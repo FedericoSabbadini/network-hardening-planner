@@ -210,7 +210,7 @@ class NetworkHardeningDomain:
         migrate_service_action.add_effect(self.fluents['service_uses_port'](h, s, p_new), True)
         migrate_service_action.add_effect(self.fluents['service_uses_port'](h, s, p_old), False)
         migrate_service_action.add_effect(self.fluents['migrate_possibility'](h, s, p_old, p_new), False)
-        migrate_service_action.add_effect(self.fluents['service_reachable'](h, s), True)
+        #migrate_service_action.add_effect(self.fluents['service_reachable'](h, s), True)
         migrate_service_action.add_effect(self.fluents['service_used_port'](h, s, p_old), True)
         return migrate_service_action
 

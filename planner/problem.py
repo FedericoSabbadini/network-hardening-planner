@@ -46,7 +46,6 @@ class NetworkHardeningProblem:
             service_to_port[service] = port
         return service_to_port, open_ports
 
-
     def _get_dependent_services(self, host_id, service, scenario):
         """Returns list of (host_id, service) that depend on (host_id, service)."""
         return [
@@ -305,7 +304,7 @@ class NetworkHardeningProblem:
                     name='fast-downward',
                     optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY
                 ) as planner:
-                    result = planner.solve(compiled.problem)
+                    result = planner.solve(compiled.problem) # type: ignore
                     # Map the plan back to original action instances for readability
                     # Note: the plan may be None if the problem is unsolvable, so I check before mapping back.
                     if result.plan:
