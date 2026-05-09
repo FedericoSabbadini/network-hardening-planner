@@ -1,0 +1,475 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\definecolor{headerblue}{RGB}{30,80,140}
+\definecolor{rowgray}{RGB}{240,240,245}
+
+\titleformat{\section}{\large\bfseries\color{headerblue}}{{\thesection.}}{0.6em}{}[\vspace{-0.3em}\color{headerblue}\rule{\linewidth}{0.6pt}]
+\titleformat{\subsection}{\normalsize\bfseries\color{headerblue}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection}{0.6em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\small\textcolor{headerblue}{\textbf{Network Hardening Planner}}}
+\fancyhead[R]{\small Automated Planning Project}
+\fancyfoot[C]{\thepage}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcommand{\hrow}{\rowcolor{rowgray}}
+
+\hypersetup{colorlinks=true,linkcolor=headerblue,urlcolor=headerblue,pdftitle={Network Hardening Planner}}
+
+\begin{document}
+	
+	\begin{titlepage}
+		\centering
+		\vspace*{3cm}
+		{\Huge\bfseries\color{headerblue} Network Hardening Planner\par}
+		\vspace{1.2cm}
+		{\large Automated Planning Project\\[0.3em] for AI Course\par}
+		\vspace{2cm}
+		\color{headerblue}\rule{0.5\linewidth}{0.8pt}
+		\vfill
+	\end{titlepage}
+	
+	\tableofcontents
+	\newpage
+	
+	\section{Introduction}
+	
+	Enterprise network infrastructures are rarely built from scratch. They accumulate legacy services,
+	deprecated protocols, and open ports over years of organic growth. When a security audit or
+	compliance review demands hardening, network administrators face a combinatorial challenge: which
+	services to disable, which ports to close, which to migrate, and in what order --- all without
+	breaking the services that business operations depend on.
+	
+	This project, \textbf{Network Hardening Planner}, frames network hardening as a formal Automated
+	Planning problem and solves it optimally using the \textbf{Unified Planning Framework} and the
+	\textbf{Fast Downward} solver. Given a machine-readable JSON description of a network (hosts,
+	services, ports, dependencies, vulnerabilities) and a security policy (forbidden ports, forbidden
+	services), the system produces a plan --- a legally ordered sequence of hardening actions --- that
+	satisfies all security goals without breaking continuity of service.
+	
+	\newpage
+	\section{Approach: Classical Planning}
+	
+	The project uses \textbf{Classical (STRIPS-like + grounding) Planning} as its core formalism.
+	This choice is deliberate and well-justified by the structure of the problem.
+	
+	\subsection{Why Classical Planning?}
+	
+	Classical planning operates on a state space defined by a finite set of boolean fluents
+	(propositions) and actions with typed preconditions and deterministic effects. Given an initial
+	state, a conjunction of true fluents, and a set of goal conditions, the planner finds a sequence
+	of actions that transitions from initial state to goal state.
+	
+	Network hardening maps cleanly onto this formalism:
+	
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{The state is fully observable:} we know which ports are open, which services are active, which are vulnerable.
+		\item \textbf{Actions are deterministic:} blocking a port closes it; patching a service removes its vulnerability.
+		\item \textbf{Goals are propositional:} forbidden ports must be closed; vulnerabilities must be resolved.
+		\item \textbf{The problem is finite:} a bounded number of hosts, ports, and services.
+	\end{itemize}
+	
+	Alternative formalisms --- temporal planning, probabilistic planning, hierarchical task networks
+	--- add expressive power at the cost of solver availability and computational complexity. For this
+	problem, the additional expressiveness is not needed: risk is modelled as action cost, and timing
+	as plan length.
+	
+	\subsection{The Unified Planning Framework}
+	
+	The \textbf{Unified Planning (UP) Framework} is a Python library that provides a solver-agnostic
+	API for automated planning, allowing problems to be defined once and solved by multiple engines
+	without code changes. This project targets classical, cost-optimal planning and uses
+	\textbf{Fast Downward} as the backend engine. It supports optimal planning via A* search with
+	admissible heuristics (LM-cut, merge-and-shrink), ensuring that the returned plan has the minimum
+	total action cost via the \texttt{OptimalityGuarantee.SOLVED\_OPTIMALLY} flag.
+	
+	The UP Compiler with \texttt{CompilationKind.GROUNDING} is used because Fast Downward operates on
+	propositional (ground) problems; it lifts the typed first-order domain to a flat STRIPS problem
+	before solving.
+	\newpage
+	\section{Planning Domain (\texttt{domain.py})}
+	
+	The domain is implemented in \texttt{planner/domain.py} as the \texttt{NetworkHardeningDomain}
+	class. It encapsulates all types, fluents, and actions and hands a fully configured UP Problem
+	instance to the problem layer.
+	
+	\subsection{Object Types}
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Object types used in the planning domain}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} L{2.5cm} X @{}}
+			\toprule
+			\textbf{Type} & \textbf{Description} \\
+			\midrule
+			\hrow Host    & A machine in the network: server, workstation, appliance, or virtual machine. \\
+			Port    & A TCP/UDP port number. Represented as an object (not an integer) to enable quantification over ports in preconditions and effects. \\
+			\hrow Service & A running process bound to one or more ports (e.g.\ \texttt{http}, \texttt{ssh}, \texttt{ftp}, \texttt{telnet}). \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	\subsection{Fluents}
+	
+	Twelve boolean fluents represent the full state of the planning problem. All fluents default to
+	\texttt{False}; the problem layer sets them to \texttt{True} for the specific scenario.
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Boolean fluents of the planning domain}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} L{3.8cm} L{3.6cm} X @{}}
+			\toprule
+			\textbf{Fluent} & \textbf{Parameters} & \textbf{Meaning} \\
+			\midrule
+			\hrow \texttt{open\_port}            & Host, Port            & Port is currently open and usable on the host. \\
+			\texttt{service\_active}       & Host, Service         & Service process is running on the host. \\
+			\hrow \texttt{service\_critical}     & Host, Service         & Service cannot be disabled or migrated (business-critical). \\
+			\texttt{service\_uses\_port}   & Host, Service, Port   & Service is currently bound to this port. \\
+			\hrow \texttt{service\_used\_port}   & Host, Service, Port   & Port was previously used by a service. \\
+			\texttt{depends\_on}           & Host, Svc, Host, Svc  & First service availability depends on the second. \\
+			\hrow \texttt{migrate\_possibility}  & Host, Svc, Port, Port & Service can safely move from old port to new port. \\
+			\texttt{open\_possibility}     & Host, Port            & A non-forbidden port is available to open on this host. \\
+			\hrow \texttt{service\_vulnerable}   & Host, Service         & Service has an unpatched known vulnerability. \\
+			\texttt{port\_forbidden}       & Port                  & Port is banned by security policy (global). \\
+			\hrow \texttt{service\_forbidden}    & Service               & Service is banned by security policy (global). \\
+			\texttt{service\_reachable}    & Host, Service         & Service is accessible from outside the local network. \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	\subsection{Actions}
+	
+	Seven instantaneous actions are defined with typed parameters, preconditions, and unconditional
+	effects; costs are attached at the problem level via \texttt{MinimizeActionCosts}.
+	
+	\subsubsection{\texttt{patch\_service} \quad (cost: 3)}
+	
+	Mitigates a vulnerability on an already-isolated service; low cost because patching does not
+	require downtime and its only risk is patch incompatibility.
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{Preconditions:} The service must be active, vulnerable, and not reachable.
+		\item \textbf{Effects:} \texttt{service\_vulnerable} $\rightarrow$ \texttt{False}.
+	\end{itemize}
+	
+	\subsubsection{\texttt{block\_for\_maintenance} \quad (cost: 4)}
+	
+	Temporarily closes a port as the first step of a patch-then-restore sequence.
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{Preconditions:} Requires the service to be active, reachable, and vulnerable.
+		\item \textbf{Effects:} closes port, removes \texttt{service\_uses\_port}, sets \texttt{service\_used\_port} (history), makes service unreachable.
+	\end{itemize}
+	
+	\subsubsection{\texttt{restore\_service} \quad (cost: 4)}
+	
+	Re-opens a port for a service that was blocked for maintenance and has since been patched.
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{Preconditions:} port was previously used, service active but unreachable, service no longer vulnerable, port and service not forbidden.
+		\item \textbf{Effects:} reopens port, restores \texttt{service\_uses\_port}, makes service reachable, clears \texttt{service\_used\_port}.
+	\end{itemize}
+	
+	\subsubsection{\texttt{block\_port} \quad (cost: 5)}
+	
+	Permanently closes a port used by a service.
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{Preconditions:} Requires the service to be active, reachable, and no service that depends on this service may currently be reachable.
+		\item \textbf{Effects:} closes port, removes \texttt{service\_uses\_port}, makes service unreachable.
+	\end{itemize}
+	
+	\subsubsection{\texttt{disable\_service} \quad (cost: 10)}
+	
+	Shuts down a service entirely; high cost reflects permanent operational disruption and slow recovery.
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{Preconditions:} The service must already be unreachable and must not be critical.
+		\item \textbf{Effects:} \texttt{service\_active} $\rightarrow$ \texttt{False}.
+	\end{itemize}
+	
+	\subsubsection{\texttt{open\_new\_port} \quad (cost: 14)}
+	
+	Assigns a new, previously unused port to a service when a service's current port is forbidden and
+	has no pre-configured alternative with \texttt{open\_possibility} set.
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{Preconditions:} service active but unreachable, target port not open, neither service nor port is forbidden, service not critical, service not vulnerable.
+		\item \textbf{Effects:} opens port, assigns to service, makes service reachable, clears \texttt{open\_possibility}.
+	\end{itemize}
+	
+	\subsubsection{\texttt{migrate\_service} \quad (cost: 16)}
+	
+	Moves a service from its current forbidden port to a pre-validated alternative port (from
+	\texttt{ALTERNATIVE\_PORTS}). The most expensive action --- requires coordinated firewall, service
+	configuration, and potentially client configuration changes, with the highest risk of introducing
+	new issues.
+	\begin{itemize}[leftmargin=1.5em]
+		\item \textbf{Preconditions:} new port open possibility, service active but unreachable, service no longer vulnerable, port and service not forbidden.
+		\item \textbf{Effects:} opens new port, restores \texttt{service\_uses\_port}, makes service reachable, clears \texttt{migrate\_possibility}.
+	\end{itemize}
+	\newpage
+	\section{Problem Instantiation (\texttt{problem.py})}
+	
+	\texttt{NetworkHardeningProblem} in \texttt{planner/problem.py} takes a parsed JSON scenario and
+	produces a solvable UP problem in three phases: object creation, initial state definition, and
+	goal definition.
+	
+	\subsection{Object Creation}
+	
+	Objects are created for all hosts, ports, and services in the scenario; the port set is augmented
+	with alternative ports (from \texttt{ALTERNATIVE\_PORTS}) and service ports (9000--9009), ensuring
+	the grounded problem contains all ports the planner might need without requiring manual enumeration
+	in the JSON.
+	
+	\subsection{Initial State}
+	
+	The initial state is built by iterating over each host and its features:
+	\begin{itemize}[leftmargin=1.5em]
+		\item \texttt{open\_port} set for every port currently in use on each host.
+		\item \texttt{service\_active}, \texttt{service\_uses\_port}, \texttt{service\_reachable} set for each (host, service, port) triple.
+		\item \texttt{service\_critical} and \texttt{service\_vulnerable} set conditionally from JSON feature flags.
+		\item \texttt{depends\_on} set for each declared cross-host service dependency.
+		\item \texttt{migrate\_possibility} set when a port has a defined alternative in \texttt{ALTERNATIVE\_PORTS}.
+		\item \texttt{port\_forbidden} and \texttt{service\_forbidden} set globally from the policy section.
+		\item \texttt{open\_possibility} set for hosts with a service on a forbidden port with no usable alternative.
+	\end{itemize}
+	\newpage
+	\subsection{Goals}
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Planning goals}
+		\renewcommand{\arraystretch}{1.4}
+		\begin{tabularx}{\linewidth}{@{} C{1.0cm} L{4.5cm} X @{}}
+			\toprule
+			\textbf{Goal} & \textbf{Condition} & \textbf{Formal Statement} \\
+			\midrule
+			\hrow G1 & Fix vulnerabilities        & $\neg\,\texttt{service\_vulnerable}(h,s)$ \enspace for all vulnerable, non-forbidden services \\
+			G2 & Close forbidden ports      & $\neg\,\texttt{open\_port}(h,p)$ \enspace for all services on forbidden ports \\
+			\hrow G3 & Disable forbidden services & $\neg\,\texttt{service\_active}(h,s)$ \enspace for all services in \texttt{forbidden\_services} \\
+			G4 & Preserve reachability      & $\texttt{service\_reachable}(h,s)$ \enspace for all non-forbidden services \\
+			\hrow G5 & Preserve same port         & $\texttt{service\_uses\_port}(h,s,p)$ \enspace for vulnerable services on non-forbidden ports \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	\newpage
+	\section{Configuration (\texttt{conf.py})}
+	
+	\subsection{\texttt{ACTION\_COSTS}}
+	
+	This table maps action name substrings to integer costs: the problem layer links actions by name
+	and assigns the first matching cost.
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Action costs and rationale}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} L{4.4cm} C{1.4cm} X @{}}
+			\toprule
+			\textbf{Action} & \textbf{Cost} & \textbf{Rationale} \\
+			\midrule
+			\hrow \texttt{patch\_service}          & 3  & Low disruption; moderate risk of patch incompatibility \\
+			\texttt{block\_for\_maintenance} & 4  & Planned, temporary; communicated in advance; reversible \\
+			\hrow \texttt{restore\_service}        & 4  & Restores previous state; low risk if patch is confirmed \\
+			\texttt{block\_port}             & 5  & Permanent firewall change; risk of breaking hidden dependencies \\
+			\hrow \texttt{disable\_service}        & 10 & Hard to reverse; significant operational disruption \\
+			\texttt{open\_new\_port}         & 14 & Security risk if misconfigured; multiple coordinated changes \\
+			\hrow \texttt{migrate\_service}        & 16 & Highest complexity; client impact; coordination overhead \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	\subsection{\texttt{ALTERNATIVE\_PORTS}}
+	
+	When a forbidden port has an entry here, the problem layer automatically sets
+	\texttt{migrate\_possibility} for each service on that port, enabling \texttt{migrate\_service}
+	without additional user configuration.
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Alternative port mappings}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} C{3.5cm} C{3.5cm} X @{}}
+			\toprule
+			\textbf{Forbidden Port} & \textbf{Alternative} & \textbf{Protocol} \\
+			\midrule
+			\hrow 80   & 80808 & HTTP $\rightarrow$ HTTP-alt \\
+			21   & 2121  & FTP $\rightarrow$ FTP-alt \\
+			\hrow 143  & 1143  & IMAP $\rightarrow$ IMAP-alt \\
+			3389 & 33389 & RDP $\rightarrow$ RDP-alt \\
+			\hrow 5900 & 59000 & VNC $\rightarrow$ VNC-alt \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	\subsection{\texttt{SERVICE\_PORTS}}
+	
+	A pool of ten generic ports (9000--9009) available for \texttt{open\_new\_port} when no
+	alternative exists; the problem layer sets \texttt{open\_possibility} for each of these on hosts
+	that need it.
+	\newpage
+	\section{Scenarios \& Use Cases}
+	
+	\subsection{Benchmark Scenarios (\texttt{input/scenarios/})}
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Benchmark scenarios}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} C{0.7cm} L{4.2cm} C{1.5cm} X @{}}
+			\toprule
+			\textbf{\#} & \textbf{Name} & \textbf{Hosts} & \textbf{Key Feature} \\
+			\midrule
+			\hrow 01 & \texttt{all\_actions\_basic} & 3  & All action types exercised; baseline test \\
+			02 & \texttt{deps\_all\_actions}  & 4  & Cross-host service dependency chains \\
+			\hrow 03 & \texttt{enterprise\_mixed}   & 8  & Mixed criticality; 5 forbidden ports \\
+			04 & \texttt{security\_incident}  & 6  & Post-breach emergency hardening profile \\
+			\hrow 05 & \texttt{healthcare\_gdpr}    & 7  & GDPR compliance requirements \\
+			06 & \texttt{financial\_pci}      & 9  & PCI-DSS: 7 forbidden ports + 4 services \\
+			\hrow 07 & \texttt{stress\_test}        & 14 & Scalability and solver performance \\
+			08 & \texttt{impossible}          & 1  & Critical service on forbidden port --- UNSOLVABLE \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	Scenario~08 is deliberately unsolvable: a critical MySQL service runs on port~3306, which is
+	forbidden by policy. The planner cannot close port~3306 without disabling the service, and cannot
+	disable it because it is critical.
+	
+	\subsection{Use Cases (\texttt{input/use\_cases/})}
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Real-world use cases}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} C{0.7cm} L{4.8cm} X @{}}
+			\toprule
+			\textbf{\#} & \textbf{Name} & \textbf{Description} \\
+			\midrule
+			\hrow 09 & \texttt{devops\_pipeline}    & CI/CD infrastructure: build servers, registries, orchestrators \\
+			10 & \texttt{ecommerce\_platform} & Mixed public/private stack: web, payment, database, CDN \\
+			\hrow 11 & \texttt{telecom\_core}       & Core telecom with legacy protocols and NOC services \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	\newpage
+	\section{Runner \& Analysis (\texttt{main.py})}
+	
+	The file \texttt{main.py} orchestrates execution, result collection, and visualization (notebook
+	version \texttt{.ipynb}).
+	
+	\subsection{Execution Pipeline}
+	
+	\begin{enumerate}[leftmargin=1.5em]
+		\item Load all \texttt{.json} files from \texttt{input/<folder>}, sorted alphabetically.
+		\item For each scenario: instantiate \texttt{NetworkHardeningProblem}, print statistics, call \texttt{solve()}, record metrics.
+		\item Parse each action in the plan and accumulate counts by action type.
+		\item Save the plan to \texttt{output/<folder>/plans/plan\_<name>.txt}.
+		\item After all scenarios: save \texttt{summary.csv}, print aggregate statistics, generate four charts.
+	\end{enumerate}
+	
+	\subsection{Output Charts}
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Output visualisation charts}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} L{3.2cm} L{4.8cm} X @{}}
+			\toprule
+			\textbf{Chart} & \textbf{File} & \textbf{Content} \\
+			\midrule
+			\hrow Resolution Time & \texttt{resolution\_time.png} & Bar chart: solver wall-clock time per scenario (green = success, red = failure) \\
+			Total Plan Cost  & \texttt{total\_cost.png}      & Bar chart: sum of action costs for each solved scenario \\
+			\hrow Actions by Type  & \texttt{actions\_by\_type.png}& Grouped bar chart: action type breakdown per scenario \\
+			Success Rate      & \texttt{success\_rate.png}   & Pie chart: percentage solved vs.\ unsolvable/error \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	\newpage
+	\section{Results}
+	
+	The following results were obtained by running the full scenario suite; times are wall-clock
+	seconds on a standard laptop.
+	
+	\subsection{Benchmark}
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Benchmark scenario results}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} L{5.0cm} L{2.4cm} C{1.8cm} C{1.4cm} C{1.8cm} @{}}
+			\toprule
+			\textbf{Scenario} & \textbf{Status} & \textbf{Actions} & \textbf{Cost} & \textbf{Time} \\
+			\midrule
+			\hrow \texttt{01\_all\_actions\_basic} & SUCCESS    & 5  & 25  & $<1\,$s \\
+			\texttt{02\_deps\_all\_actions}  & SUCCESS    & 7  & 41  & $<1\,$s \\
+			\hrow \texttt{03\_enterprise\_mixed}   & SUCCESS    & 12 & 68  & $<2\,$s \\
+			\texttt{04\_security\_incident}  & SUCCESS    & 9  & 47  & $<1\,$s \\
+			\hrow \texttt{05\_healthcare\_gdpr}    & SUCCESS    & 11 & 60  & $<2\,$s \\
+			\texttt{06\_financial\_pci}      & SUCCESS    & 15 & 89  & $<3\,$s \\
+			\hrow \texttt{07\_stress\_test}        & SUCCESS    & 22 & 134 & $<5\,$s \\
+			\texttt{08\_impossible}          & UNSOLVABLE & -- & --  & $<1\,$s \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Use case results}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} L{5.0cm} L{2.4cm} C{1.8cm} C{1.4cm} C{1.8cm} @{}}
+			\toprule
+			\textbf{Use Case} & \textbf{Status} & \textbf{Actions} & \textbf{Cost} & \textbf{Time} \\
+			\midrule
+			\hrow \texttt{09\_devops\_pipeline}    & SUCCESS & 131 & 1000 & $<55\,$s  \\
+			\texttt{10\_ecommerce\_platform} & SUCCESS & 120 & 810  & $<65\,$s  \\
+			\hrow \texttt{11\_telecom\_core}       & SUCCESS & 176 & 1230 & $<100\,$s \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	\newpage
+	\subsection{Action Type Distribution}
+	
+	The planner predominantly chose low-cost actions (\texttt{patch\_service},
+	\texttt{block\_for\_maintenance}) over expensive ones (\texttt{migrate\_service},
+	\texttt{open\_new\_port}). This is expected --- the cost model correctly steers the planner toward
+	minimally disruptive solutions.
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Action type frequency across all scenarios}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabularx}{\linewidth}{@{} L{6.5cm} X @{}}
+			\toprule
+			\textbf{Action Type} & \textbf{Frequency} \\
+			\midrule
+			\hrow \texttt{patch\_service} (cost 3)          & Moderate \\
+			\texttt{block\_for\_maintenance} (cost 4) & Rare \\
+			\hrow \texttt{restore\_service} (cost 4)        & Rare \\
+			\texttt{block\_port} (cost 5)             & Most frequent \\
+			\hrow \texttt{disable\_service} (cost 10)       & Frequent \\
+			\texttt{open\_new\_port} (cost 14)        & Frequent \\
+			\hrow \texttt{migrate\_service} (cost 16)       & Frequent \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+\end{document}
