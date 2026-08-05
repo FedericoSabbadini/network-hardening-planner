@@ -1,0 +1,40 @@
+# Env files
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Build / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# OS
+.DS_Store
+__MACOSX/
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code (local, not committed)
+.claude/settings.local.json
+CLAUDE.md
+CLAUDE.local.md
